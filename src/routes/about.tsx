@@ -165,30 +165,41 @@ function About() {
             intro="Additional staff, board members, ministry leaders and volunteers will be added here as the church grows."
           />
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            {LEADERSHIP.map((person, i) => (
+            {LEADERSHIP.map((person, i) => {
+              const photo = LEADER_PHOTOS[person.name];
+              return (
               <Reveal as="article" key={person.name} delay={i * 0.1}>
                 <div className="card-soft card-hover h-full overflow-hidden">
                   <div className="flex items-center gap-5 border-b border-border bg-cream p-8">
-                    <div
-                      className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-2xl text-primary"
-                      aria-hidden="true"
-                    >
-                      {person.name
-                        .replace("Pastor ", "")
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </div>
+                    {photo ? (
+                      <img
+                        src={photo.url}
+                        alt={photo.alt}
+                        width={160}
+                        height={160}
+                        loading="lazy"
+                        className="h-24 w-24 shrink-0 rounded-full border border-border object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-2xl text-primary"
+                        aria-hidden="true"
+                      >
+                        {person.name
+                          .replace("Pastor ", "")
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                    )}
                     <div>
                       <h3 className="text-2xl">{person.name}</h3>
                       <p className="mt-1 text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                         {person.role}
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Photograph coming soon.
-                      </p>
                     </div>
                   </div>
+
                   <div className="space-y-4 p-8 leading-relaxed text-muted-foreground">
                     {person.bio.map((para) => (
                       <p key={para.slice(0, 30)}>{para}</p>
