@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as BeliefsRouteImport } from './routes/beliefs'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ChildrenAndFamiliesRouteImport } from './routes/children-and-families'
@@ -18,8 +19,11 @@ import { Route as ConnectionGroupsRouteImport } from './routes/connection-groups
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as GiveRouteImport } from './routes/give'
+import { Route as GivingPolicyRouteImport } from './routes/giving-policy'
 import { Route as MinistriesRouteImport } from './routes/ministries'
 import { Route as PlanYourVisitRouteImport } from './routes/plan-your-visit'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as SermonsRouteImport } from './routes/sermons'
 
 const IndexRoute = IndexRouteImport.update({
@@ -30,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessibilityRoute = AccessibilityRouteImport.update({
+  id: '/accessibility',
+  path: '/accessibility',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BeliefsRoute = BeliefsRouteImport.update({
@@ -67,6 +76,11 @@ const GiveRoute = GiveRouteImport.update({
   path: '/give',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GivingPolicyRoute = GivingPolicyRouteImport.update({
+  id: '/giving-policy',
+  path: '/giving-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MinistriesRoute = MinistriesRouteImport.update({
   id: '/ministries',
   path: '/ministries',
@@ -75,6 +89,16 @@ const MinistriesRoute = MinistriesRouteImport.update({
 const PlanYourVisitRoute = PlanYourVisitRouteImport.update({
   id: '/plan-your-visit',
   path: '/plan-your-visit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SermonsRoute = SermonsRouteImport.update({
@@ -86,6 +110,7 @@ const SermonsRoute = SermonsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/beliefs': typeof BeliefsRoute
   '/blog': typeof BlogRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
@@ -93,13 +118,17 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
   '/give': typeof GiveRoute
+  '/giving-policy': typeof GivingPolicyRoute
   '/ministries': typeof MinistriesRoute
   '/plan-your-visit': typeof PlanYourVisitRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/sermons': typeof SermonsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/beliefs': typeof BeliefsRoute
   '/blog': typeof BlogRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
@@ -107,14 +136,18 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
   '/give': typeof GiveRoute
+  '/giving-policy': typeof GivingPolicyRoute
   '/ministries': typeof MinistriesRoute
   '/plan-your-visit': typeof PlanYourVisitRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/sermons': typeof SermonsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/beliefs': typeof BeliefsRoute
   '/blog': typeof BlogRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
@@ -122,8 +155,11 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
   '/give': typeof GiveRoute
+  '/giving-policy': typeof GivingPolicyRoute
   '/ministries': typeof MinistriesRoute
   '/plan-your-visit': typeof PlanYourVisitRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/sermons': typeof SermonsRoute
 }
 export interface FileRouteTypes {
@@ -131,6 +167,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/accessibility'
     | '/beliefs'
     | '/blog'
     | '/children-and-families'
@@ -138,13 +175,17 @@ export interface FileRouteTypes {
     | '/contact'
     | '/events'
     | '/give'
+    | '/giving-policy'
     | '/ministries'
     | '/plan-your-visit'
+    | '/privacy-policy'
+    | '/refund-policy'
     | '/sermons'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/accessibility'
     | '/beliefs'
     | '/blog'
     | '/children-and-families'
@@ -152,13 +193,17 @@ export interface FileRouteTypes {
     | '/contact'
     | '/events'
     | '/give'
+    | '/giving-policy'
     | '/ministries'
     | '/plan-your-visit'
+    | '/privacy-policy'
+    | '/refund-policy'
     | '/sermons'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/accessibility'
     | '/beliefs'
     | '/blog'
     | '/children-and-families'
@@ -166,14 +211,18 @@ export interface FileRouteTypes {
     | '/contact'
     | '/events'
     | '/give'
+    | '/giving-policy'
     | '/ministries'
     | '/plan-your-visit'
+    | '/privacy-policy'
+    | '/refund-policy'
     | '/sermons'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccessibilityRoute: typeof AccessibilityRoute
   BeliefsRoute: typeof BeliefsRoute
   BlogRoute: typeof BlogRoute
   ChildrenAndFamiliesRoute: typeof ChildrenAndFamiliesRoute
@@ -181,8 +230,11 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   EventsRoute: typeof EventsRoute
   GiveRoute: typeof GiveRoute
+  GivingPolicyRoute: typeof GivingPolicyRoute
   MinistriesRoute: typeof MinistriesRoute
   PlanYourVisitRoute: typeof PlanYourVisitRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   SermonsRoute: typeof SermonsRoute
 }
 
@@ -200,6 +252,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accessibility': {
+      id: '/accessibility'
+      path: '/accessibility'
+      fullPath: '/accessibility'
+      preLoaderRoute: typeof AccessibilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/beliefs': {
@@ -251,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/giving-policy': {
+      id: '/giving-policy'
+      path: '/giving-policy'
+      fullPath: '/giving-policy'
+      preLoaderRoute: typeof GivingPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ministries': {
       id: '/ministries'
       path: '/ministries'
@@ -263,6 +329,20 @@ declare module '@tanstack/react-router' {
       path: '/plan-your-visit'
       fullPath: '/plan-your-visit'
       preLoaderRoute: typeof PlanYourVisitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sermons': {
@@ -278,6 +358,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccessibilityRoute: AccessibilityRoute,
   BeliefsRoute: BeliefsRoute,
   BlogRoute: BlogRoute,
   ChildrenAndFamiliesRoute: ChildrenAndFamiliesRoute,
@@ -285,8 +366,11 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   EventsRoute: EventsRoute,
   GiveRoute: GiveRoute,
+  GivingPolicyRoute: GivingPolicyRoute,
   MinistriesRoute: MinistriesRoute,
   PlanYourVisitRoute: PlanYourVisitRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   SermonsRoute: SermonsRoute,
 }
 export const routeTree = rootRouteImport
