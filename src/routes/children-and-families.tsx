@@ -109,15 +109,49 @@ function ChildrenAndFamilies() {
 
           <form
             className="card-soft mt-10 space-y-6 p-8"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              toast.success("Registration received", {
-                description:
-                  "Thank you. Our children’s ministry team will be in touch before your visit.",
-              });
-              (e.target as HTMLFormElement).reset();
-              setConsent(false);
+              const form = e.currentTarget;
+              const fd = new FormData(form);
+              const get = (k: string) => String(fd.get(k) ?? "");
+              const notes = [
+                get("medical_information"),
+                get("sensory_needs") ? `Sensory needs: ${get("sensory_needs")}` : "",
+                get("additional_information")
+                  ? `Other: ${get("additional_information")}`
+                  : "",
+              ]
+                .filter(Boolean)
+                .join("\n");
+              try {
+                await submitChildRegistration({
+                  data: {
+                    parent_name: get("parent_name"),
+                    parent_email: get("parent_email"),
+                    parent_phone: get("parent_phone"),
+                    child_first_name: get("child_name"),
+                    child_last_name: "",
+                    child_age: fd.get("child_age") ? Number(fd.get("child_age")) : null,
+                    allergies: get("allergies"),
+                    medical_notes: notes,
+                    special_needs: get("accommodation_needs"),
+                    emergency_contact_name: get("emergency_contact"),
+                    emergency_contact_phone: "",
+                    authorized_pickup: "",
+                    photo_consent: false,
+                  },
+                });
+                toast.success("Registration received", {
+                  description:
+                    "Thank you. Our children’s ministry team will be in touch before your visit.",
+                });
+                form.reset();
+                setConsent(false);
+              } catch {
+                toast.error("Registration could not be saved. Please try again.");
+              }
             }}
+
           >
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Parent or guardian name" required>
