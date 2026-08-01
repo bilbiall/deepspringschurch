@@ -6,6 +6,8 @@ import { pageMeta, SITE, DIRECTIONS_URL, MAP_EMBED_URL } from "@/lib/site";
 import { PageHero, SectionHeading, ActionLink, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
+import { submitContactMessage } from "@/lib/public-forms.functions";
+
 
 export const Route = createFileRoute("/contact")({
   head: () =>
