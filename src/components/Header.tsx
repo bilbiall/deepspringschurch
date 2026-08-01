@@ -13,6 +13,7 @@ const NAV = [
   { label: "Ministries", to: "/ministries" },
   { label: "Sermons", to: "/sermons" },
   { label: "Events", to: "/events" },
+  { label: "Blog", to: "/blog" },
   { label: "Give", to: "/give" },
   { label: "Contact", to: "/contact" },
 ];
