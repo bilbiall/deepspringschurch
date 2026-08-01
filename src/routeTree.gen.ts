@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as BeliefsRouteImport } from './routes/beliefs'
+import { Route as ChildrenAndFamiliesRouteImport } from './routes/children-and-families'
+import { Route as ConnectionGroupsRouteImport } from './routes/connection-groups'
 import { Route as MinistriesRouteImport } from './routes/ministries'
+import { Route as SermonsRouteImport } from './routes/sermons'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,9 +32,24 @@ const BeliefsRoute = BeliefsRouteImport.update({
   path: '/beliefs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChildrenAndFamiliesRoute = ChildrenAndFamiliesRouteImport.update({
+  id: '/children-and-families',
+  path: '/children-and-families',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectionGroupsRoute = ConnectionGroupsRouteImport.update({
+  id: '/connection-groups',
+  path: '/connection-groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MinistriesRoute = MinistriesRouteImport.update({
   id: '/ministries',
   path: '/ministries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SermonsRoute = SermonsRouteImport.update({
+  id: '/sermons',
+  path: '/sermons',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -39,34 +57,68 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/beliefs': typeof BeliefsRoute
+  '/children-and-families': typeof ChildrenAndFamiliesRoute
+  '/connection-groups': typeof ConnectionGroupsRoute
   '/ministries': typeof MinistriesRoute
+  '/sermons': typeof SermonsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/beliefs': typeof BeliefsRoute
+  '/children-and-families': typeof ChildrenAndFamiliesRoute
+  '/connection-groups': typeof ConnectionGroupsRoute
   '/ministries': typeof MinistriesRoute
+  '/sermons': typeof SermonsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/beliefs': typeof BeliefsRoute
+  '/children-and-families': typeof ChildrenAndFamiliesRoute
+  '/connection-groups': typeof ConnectionGroupsRoute
   '/ministries': typeof MinistriesRoute
+  '/sermons': typeof SermonsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/beliefs' | '/ministries'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/beliefs'
+    | '/children-and-families'
+    | '/connection-groups'
+    | '/ministries'
+    | '/sermons'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/beliefs' | '/ministries'
-  id: '__root__' | '/' | '/about' | '/beliefs' | '/ministries'
+  to:
+    | '/'
+    | '/about'
+    | '/beliefs'
+    | '/children-and-families'
+    | '/connection-groups'
+    | '/ministries'
+    | '/sermons'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/beliefs'
+    | '/children-and-families'
+    | '/connection-groups'
+    | '/ministries'
+    | '/sermons'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   BeliefsRoute: typeof BeliefsRoute
+  ChildrenAndFamiliesRoute: typeof ChildrenAndFamiliesRoute
+  ConnectionGroupsRoute: typeof ConnectionGroupsRoute
   MinistriesRoute: typeof MinistriesRoute
+  SermonsRoute: typeof SermonsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +144,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BeliefsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/children-and-families': {
+      id: '/children-and-families'
+      path: '/children-and-families'
+      fullPath: '/children-and-families'
+      preLoaderRoute: typeof ChildrenAndFamiliesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connection-groups': {
+      id: '/connection-groups'
+      path: '/connection-groups'
+      fullPath: '/connection-groups'
+      preLoaderRoute: typeof ConnectionGroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ministries': {
       id: '/ministries'
       path: '/ministries'
       fullPath: '/ministries'
       preLoaderRoute: typeof MinistriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sermons': {
+      id: '/sermons'
+      path: '/sermons'
+      fullPath: '/sermons'
+      preLoaderRoute: typeof SermonsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,7 +179,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   BeliefsRoute: BeliefsRoute,
+  ChildrenAndFamiliesRoute: ChildrenAndFamiliesRoute,
+  ConnectionGroupsRoute: ConnectionGroupsRoute,
   MinistriesRoute: MinistriesRoute,
+  SermonsRoute: SermonsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
