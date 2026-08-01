@@ -3,6 +3,15 @@ import { pageMeta, SITE } from "@/lib/site";
 import { Reveal } from "@/components/Reveal";
 import { PageHero, SectionHeading, ActionLink } from "@/components/ui-kit";
 import { LEADERSHIP } from "@/content/church";
+import kenPhoto from "@/assets/ken-merrifield.png.asset.json";
+import janetPhoto from "@/assets/janet-merrifield.webp.asset.json";
+import familyPhoto from "@/assets/merrifield-family.png.asset.json";
+import couplePhoto from "@/assets/ken-and-janet.png.asset.json";
+
+const LEADER_PHOTOS: Record<string, { url: string; alt: string }> = {
+  "Pastor Ken Merrifield": { url: kenPhoto.url, alt: "Pastor Ken Merrifield" },
+  "Janet Merrifield": { url: janetPhoto.url, alt: "Janet Merrifield" },
+};
 
 export const Route = createFileRoute("/about")({
   head: () =>
