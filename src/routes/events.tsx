@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { Calendar, MapPin, Share2 } from "lucide-react";
 import { toast } from "sonner";
@@ -6,6 +7,9 @@ import { pageMeta, SITE, DIRECTIONS_URL } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { GRAND_OPENING } from "@/content/church";
+import { listPublishedEvents } from "@/lib/public-content.functions";
+
+type EventRow = Database["public"]["Tables"]["events"]["Row"];
 
 export const Route = createFileRoute("/events")({
   head: () =>
@@ -15,10 +19,12 @@ export const Route = createFileRoute("/events")({
         "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including our Grand Opening on October 4 and Sunday services at 10:30 AM.",
       path: "/events",
     }),
+  loader: () => listPublishedEvents(),
   component: Events,
 });
 
 function Events() {
+  const events = Route.useLoaderData() as EventRow[];
   const [view, setView] = useState<"list" | "month">("list");
 
   const share = async () => {
@@ -155,6 +161,45 @@ function Events() {
                     View Details
                   </ActionLink>
                 </li>
+                {events.map((ev) => (
+                  <li
+                    key={ev.id}
+                    className="card-soft card-hover flex flex-wrap items-center justify-between gap-6 p-7"
+                  >
+                    <div>
+                      <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                        {ev.starts_at
+                          ? new Date(ev.starts_at).toLocaleString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })
+                          : "Date to be confirmed"}
+                      </p>
+                      <h3 className="mt-2 text-xl">{ev.title}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {[ev.location ?? SITE.addressOneLine, ev.category].filter(Boolean).join(" · ")}
+                      </p>
+                      {ev.description ? (
+                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                          {ev.description}
+                        </p>
+                      ) : null}
+                    </div>
+                    {ev.registration_url ? (
+                      <ActionLink
+                        href={ev.registration_url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        variant="outline"
+                        size="sm"
+                      >
+                        Register
+                      </ActionLink>
+                    ) : null}
+                  </li>
+                ))}
               </ul>
             ) : (
               <EmptyState
