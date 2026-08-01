@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { Database } from "@/integrations/supabase/types";
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import groupsImage from "@/assets/connection-groups.jpg";
@@ -6,6 +7,8 @@ import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { listPublishedGroups } from "@/lib/public-content.functions";
+
+type GroupRow = Database["public"]["Tables"]["connection_groups"]["Row"];
 
 export const Route = createFileRoute("/connection-groups")({
   head: () =>
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/connection-groups")({
 });
 
 function ConnectionGroups() {
-  const groups = Route.useLoaderData();
+  const groups = Route.useLoaderData() as GroupRow[];
   const [query, setQuery] = useState("");
   const results = useMemo(
     () =>

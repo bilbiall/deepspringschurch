@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { Search, Play } from "lucide-react";
 import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { listPublishedSermons } from "@/lib/public-content.functions";
+
+type SermonRow = Database["public"]["Tables"]["sermons"]["Row"];
 
 export const Route = createFileRoute("/sermons")({
   head: () =>
@@ -21,7 +24,7 @@ export const Route = createFileRoute("/sermons")({
 const FILTERS = ["Series", "Speaker", "Year", "Topic", "Bible book"];
 
 function Sermons() {
-  const sermons = Route.useLoaderData();
+  const sermons = Route.useLoaderData() as SermonRow[];
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   const results = sermons.filter((s) =>

@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { pageMeta } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { listPublishedPosts } from "@/lib/public-content.functions";
+
+type PostRow = Database["public"]["Tables"]["blog_posts"]["Row"];
 
 export const Route = createFileRoute("/blog")({
   head: () =>
@@ -29,7 +32,7 @@ const CATEGORIES = [
 ];
 
 function Blog() {
-  const posts = Route.useLoaderData();
+  const posts = Route.useLoaderData() as PostRow[];
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(null);
   const q = query.trim().toLowerCase();
