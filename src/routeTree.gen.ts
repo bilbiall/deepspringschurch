@@ -14,6 +14,8 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as BeliefsRouteImport } from './routes/beliefs'
 import { Route as ChildrenAndFamiliesRouteImport } from './routes/children-and-families'
 import { Route as ConnectionGroupsRouteImport } from './routes/connection-groups'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as GiveRouteImport } from './routes/give'
 import { Route as MinistriesRouteImport } from './routes/ministries'
 import { Route as SermonsRouteImport } from './routes/sermons'
 
@@ -42,6 +44,16 @@ const ConnectionGroupsRoute = ConnectionGroupsRouteImport.update({
   path: '/connection-groups',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GiveRoute = GiveRouteImport.update({
+  id: '/give',
+  path: '/give',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MinistriesRoute = MinistriesRouteImport.update({
   id: '/ministries',
   path: '/ministries',
@@ -59,6 +71,8 @@ export interface FileRoutesByFullPath {
   '/beliefs': typeof BeliefsRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
   '/connection-groups': typeof ConnectionGroupsRoute
+  '/events': typeof EventsRoute
+  '/give': typeof GiveRoute
   '/ministries': typeof MinistriesRoute
   '/sermons': typeof SermonsRoute
 }
@@ -68,6 +82,8 @@ export interface FileRoutesByTo {
   '/beliefs': typeof BeliefsRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
   '/connection-groups': typeof ConnectionGroupsRoute
+  '/events': typeof EventsRoute
+  '/give': typeof GiveRoute
   '/ministries': typeof MinistriesRoute
   '/sermons': typeof SermonsRoute
 }
@@ -78,6 +94,8 @@ export interface FileRoutesById {
   '/beliefs': typeof BeliefsRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
   '/connection-groups': typeof ConnectionGroupsRoute
+  '/events': typeof EventsRoute
+  '/give': typeof GiveRoute
   '/ministries': typeof MinistriesRoute
   '/sermons': typeof SermonsRoute
 }
@@ -89,6 +107,8 @@ export interface FileRouteTypes {
     | '/beliefs'
     | '/children-and-families'
     | '/connection-groups'
+    | '/events'
+    | '/give'
     | '/ministries'
     | '/sermons'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +118,8 @@ export interface FileRouteTypes {
     | '/beliefs'
     | '/children-and-families'
     | '/connection-groups'
+    | '/events'
+    | '/give'
     | '/ministries'
     | '/sermons'
   id:
@@ -107,6 +129,8 @@ export interface FileRouteTypes {
     | '/beliefs'
     | '/children-and-families'
     | '/connection-groups'
+    | '/events'
+    | '/give'
     | '/ministries'
     | '/sermons'
   fileRoutesById: FileRoutesById
@@ -117,6 +141,8 @@ export interface RootRouteChildren {
   BeliefsRoute: typeof BeliefsRoute
   ChildrenAndFamiliesRoute: typeof ChildrenAndFamiliesRoute
   ConnectionGroupsRoute: typeof ConnectionGroupsRoute
+  EventsRoute: typeof EventsRoute
+  GiveRoute: typeof GiveRoute
   MinistriesRoute: typeof MinistriesRoute
   SermonsRoute: typeof SermonsRoute
 }
@@ -158,6 +184,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnectionGroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/give': {
+      id: '/give'
+      path: '/give'
+      fullPath: '/give'
+      preLoaderRoute: typeof GiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ministries': {
       id: '/ministries'
       path: '/ministries'
@@ -181,6 +221,8 @@ const rootRouteChildren: RootRouteChildren = {
   BeliefsRoute: BeliefsRoute,
   ChildrenAndFamiliesRoute: ChildrenAndFamiliesRoute,
   ConnectionGroupsRoute: ConnectionGroupsRoute,
+  EventsRoute: EventsRoute,
+  GiveRoute: GiveRoute,
   MinistriesRoute: MinistriesRoute,
   SermonsRoute: SermonsRoute,
 }

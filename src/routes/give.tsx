@@ -16,7 +16,7 @@ export const Route = createFileRoute("/give")({
         "Support the mission and ministries of Deep Spring Church of the Nazarene through secure online giving.",
       path: "/give",
     }),
-  component: Give(),
+  component: GivePage,
 });
 
 const SCRIPTURES = [
@@ -27,9 +27,8 @@ const SCRIPTURES = [
 
 const AMOUNTS = [25, 50, 100, 250];
 
-function Give() {
-  return function GivePage() {
-    const [fund, setFund] = useState(GIVING_FUNDS[0]!.slug);
+function GivePage() {
+  const [fund, setFund] = useState(GIVING_FUNDS[0]!.slug);
     const [amount, setAmount] = useState<number | "custom">(50);
     const [frequency, setFrequency] = useState("one-time");
     const [anonymous, setAnonymous] = useState(false);
