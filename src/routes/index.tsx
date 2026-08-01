@@ -14,6 +14,7 @@ import {
   MINISTRIES,
   GRAND_OPENING,
 } from "@/content/church";
+import { listPublishedSermons, listPublishedPosts } from "@/lib/public-content.functions";
 
 export const Route = createFileRoute("/")({
   head: () =>
@@ -24,12 +25,20 @@ export const Route = createFileRoute("/")({
       path: "/",
       image: `${SITE.domain}/og-image.png`,
     }),
+  loader: async () => {
+    const [sermons, posts] = await Promise.all([listPublishedSermons(), listPublishedPosts()]);
+    return { sermons: sermons.slice(0, 3), posts: posts.slice(0, 3) };
+  },
   component: Home,
 });
 
 const MISSION_ICONS = [Heart, Sprout, HandHeart];
 
 function Home() {
+  const { sermons, posts } = Route.useLoaderData() as {
+    sermons: { id: string; title: string; speaker: string | null; preached_on: string | null }[];
+    posts: { id: string; title: string; excerpt: string | null; category: string | null }[];
+  };
   const reduced = useReducedMotion();
   const rise = (delay: number) =>
     reduced
@@ -277,21 +286,71 @@ function Home() {
           <Reveal>
             <SectionHeading eyebrow="Featured sermons" title="Teaching from our services" />
             <div className="mt-8">
-              <EmptyState message="Our sermon library is being prepared. The three most recent published sermons will appear here.">
-                <ActionLink to="/sermons" variant="outline" size="sm">
-                  Visit the sermon library
-                </ActionLink>
-              </EmptyState>
+              {sermons.length === 0 ? (
+                <EmptyState message="Our sermon library is being prepared. The three most recent published sermons will appear here.">
+                  <ActionLink to="/sermons" variant="outline" size="sm">
+                    Visit the sermon library
+                  </ActionLink>
+                </EmptyState>
+              ) : (
+                <ul className="space-y-4">
+                  {sermons.map((s) => (
+                    <li key={s.id} className="card-soft card-hover p-6">
+                      <h3 className="text-lg">{s.title}</h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {[
+                          s.speaker,
+                          s.preached_on
+                            ? new Date(s.preached_on).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </li>
+                  ))}
+                  <li>
+                    <ActionLink to="/sermons" variant="outline" size="sm">
+                      Visit the sermon library
+                    </ActionLink>
+                  </li>
+                </ul>
+              )}
             </div>
           </Reveal>
           <Reveal delay={0.12}>
             <SectionHeading eyebrow="Latest resources" title="Reading and encouragement" />
             <div className="mt-8">
-              <EmptyState message="Our first articles are being written. The three most recent published posts will appear here.">
-                <ActionLink to="/blog" variant="outline" size="sm">
-                  Visit blog & resources
-                </ActionLink>
-              </EmptyState>
+              {posts.length === 0 ? (
+                <EmptyState message="Our first articles are being written. The three most recent published posts will appear here.">
+                  <ActionLink to="/blog" variant="outline" size="sm">
+                    Visit blog & resources
+                  </ActionLink>
+                </EmptyState>
+              ) : (
+                <ul className="space-y-4">
+                  {posts.map((p) => (
+                    <li key={p.id} className="card-soft card-hover p-6">
+                      {p.category ? <p className="eyebrow">{p.category}</p> : null}
+                      <h3 className="mt-2 text-lg">{p.title}</h3>
+                      {p.excerpt ? (
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                          {p.excerpt}
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
+                  <li>
+                    <ActionLink to="/blog" variant="outline" size="sm">
+                      Visit blog & resources
+                    </ActionLink>
+                  </li>
+                </ul>
+              )}
             </div>
           </Reveal>
         </div>
