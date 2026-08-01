@@ -5,6 +5,7 @@ import groupsImage from "@/assets/connection-groups.jpg";
 import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
+import { listPublishedGroups } from "@/lib/public-content.functions";
 
 export const Route = createFileRoute("/connection-groups")({
   head: () =>
@@ -14,33 +15,23 @@ export const Route = createFileRoute("/connection-groups")({
         "Connection Groups are small groups of three to five people at Deep Spring Church, built for deep relationships, prayer, honest conversation and growth in Christ.",
       path: "/connection-groups",
     }),
+  loader: () => listPublishedGroups(),
   component: ConnectionGroups,
 });
 
-type Group = {
-  id: string;
-  name: string;
-  leader: string;
-  ageGroup: string;
-  day: string;
-  time: string;
-  location: string;
-  meetingType: string;
-  availability: string;
-  description: string;
-};
-
-/** Groups are added by administrators; none are published yet. */
-const GROUPS: Group[] = [];
-
 function ConnectionGroups() {
+  const groups = Route.useLoaderData();
   const [query, setQuery] = useState("");
   const results = useMemo(
     () =>
-      GROUPS.filter((g) =>
-        [g.name, g.leader, g.ageGroup, g.day, g.location].join(" ").toLowerCase().includes(query.toLowerCase()),
+      groups.filter((g) =>
+        [g.name, g.host_name, g.age_focus, g.meeting_day, g.location]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+          .includes(query.trim().toLowerCase()),
       ),
-    [query],
+    [groups, query],
   );
 
   return (
