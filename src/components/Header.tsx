@@ -53,16 +53,21 @@ export function Header() {
     >
       <div className="container-page flex items-center justify-between gap-4 py-3">
         <Link to="/" className="flex shrink-0 items-center gap-3" aria-label={`${SITE.name} — home`}>
-          <img
-            src={logo.url}
-            alt={`${SITE.name} logo`}
-            width={56}
-            height={56}
+          <span
             className={cn(
-              "h-12 w-12 object-contain transition-all duration-500 md:h-14 md:w-14",
-              solid ? "" : "brightness-0 invert",
+              "inline-flex items-center justify-center rounded-full transition-all duration-500",
+              solid ? "" : "bg-white/92 p-1.5 shadow-[0_4px_18px_rgba(0,0,0,0.18)] backdrop-blur-sm",
             )}
-          />
+          >
+            <img
+              src={logo.url}
+              alt={`${SITE.name} logo`}
+              width={56}
+              height={56}
+              className="h-12 w-12 object-contain md:h-14 md:w-14"
+            />
+          </span>
+
           <span className="hidden leading-tight sm:block">
             <span
               className={cn(
