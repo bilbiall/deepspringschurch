@@ -134,6 +134,44 @@ function About() {
       <section className="section-y bg-background">
         <div className="container-page">
           <SectionHeading
+            eyebrow="Our family"
+            title="Ken and Janet Merrifield"
+            align="center"
+            intro="Ken and Janet have six children, including children welcomed through adoption and foster care, and fourteen grandchildren."
+          />
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            <Reveal>
+              <figure className="overflow-hidden rounded-3xl border border-border">
+                <img
+                  src={couplePhoto.url}
+                  alt="Ken and Janet Merrifield standing together outdoors at sunset"
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              </figure>
+            </Reveal>
+            <Reveal delay={0.12}>
+              <figure className="overflow-hidden rounded-3xl border border-border">
+                <img
+                  src={familyPhoto.url}
+                  alt="Janet and Ken Merrifield with their children outdoors at sunset"
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+                <figcaption className="bg-cream px-6 py-4 text-sm text-muted-foreground">
+                  Janet, Ken and family.
+                </figcaption>
+              </figure>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+
+
+      <section className="section-y bg-background">
+        <div className="container-page">
+          <SectionHeading
             eyebrow="Our approach"
             title="Simple, relational, and grounded in Scripture"
             align="center"
