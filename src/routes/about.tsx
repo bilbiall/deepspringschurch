@@ -207,7 +207,8 @@ function About() {
                   </div>
                 </div>
               </Reveal>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-12 flex flex-wrap gap-3">
             <ActionLink to="/plan-your-visit">Plan Your Visit</ActionLink>
