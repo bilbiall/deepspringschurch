@@ -79,7 +79,7 @@ const childSchema = z.object({
   parent_phone: shortText.optional().default(""),
   child_first_name: shortText.min(1),
   child_last_name: shortText.optional().default(""),
-  child_age: z.coerce.number().int().min(0).max(25).optional(),
+  child_age: z.coerce.number().int().min(0).max(25).nullable().default(null),
   allergies: longText.optional().default(""),
   medical_notes: longText.optional().default(""),
   special_needs: longText.optional().default(""),
