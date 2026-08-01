@@ -121,25 +121,25 @@ function ConnectionGroups() {
                     <dl className="mt-5 space-y-1 text-xs text-muted-foreground">
                       <div className="flex justify-between gap-3">
                         <dt>Leader</dt>
-                        <dd>{g.leader}</dd>
+                        <dd>{g.host_name ?? "—"}</dd>
                       </div>
                       <div className="flex justify-between gap-3">
                         <dt>Meets</dt>
                         <dd>
-                          {g.day} · {g.time}
+                          {[g.meeting_day, g.meeting_time].filter(Boolean).join(" · ") || "—"}
                         </dd>
                       </div>
                       <div className="flex justify-between gap-3">
                         <dt>Location</dt>
-                        <dd>{g.location}</dd>
+                        <dd>{g.location ?? "—"}</dd>
                       </div>
                       <div className="flex justify-between gap-3">
-                        <dt>Format</dt>
-                        <dd>{g.meetingType}</dd>
+                        <dt>Focus</dt>
+                        <dd>{g.age_focus ?? "All ages"}</dd>
                       </div>
                       <div className="flex justify-between gap-3">
                         <dt>Availability</dt>
-                        <dd>{g.availability}</dd>
+                        <dd>{g.is_open ? "Open to new members" : "Currently full"}</dd>
                       </div>
                     </dl>
                     <div className="mt-6">
