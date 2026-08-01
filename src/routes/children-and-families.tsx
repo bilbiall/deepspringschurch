@@ -7,6 +7,8 @@ import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
+import { submitChildRegistration } from "@/lib/public-forms.functions";
+
 import { LEADERSHIP } from "@/content/church";
 
 export const Route = createFileRoute("/children-and-families")({
