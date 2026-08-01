@@ -121,6 +121,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#ffffff" },
+      { property: "og:title", content: "Deep Spring Church of the Nazarene | Glenn Heights, Texas" },
+      { name: "twitter:title", content: "Deep Spring Church of the Nazarene | Glenn Heights, Texas" },
+      { property: "og:description", content: "Deep Spring Church of the Nazarene is a welcoming Christian community in Glenn Heights, Texas, where people find rest, grow in Christ, build relationships and serve others." },
+      { name: "twitter:description", content: "Deep Spring Church of the Nazarene is a welcoming Christian community in Glenn Heights, Texas, where people find rest, grow in Christ, build relationships and serve others." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d47109af-7eaa-4a18-8b38-7942e7e23755/id-preview-572458bf--1aac4d57-7feb-493b-a211-1beb41d9c1e4.lovable.app-1785593882921.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d47109af-7eaa-4a18-8b38-7942e7e23755/id-preview-572458bf--1aac4d57-7feb-493b-a211-1beb41d9c1e4.lovable.app-1785593882921.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
