@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccessibilityRouteImport } from './routes/accessibility'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BeliefsRouteImport } from './routes/beliefs'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ChildrenAndFamiliesRouteImport } from './routes/children-and-families'
@@ -39,6 +40,11 @@ const AboutRoute = AboutRouteImport.update({
 const AccessibilityRoute = AccessibilityRouteImport.update({
   id: '/accessibility',
   path: '/accessibility',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BeliefsRoute = BeliefsRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/admin': typeof AdminRoute
   '/beliefs': typeof BeliefsRoute
   '/blog': typeof BlogRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/admin': typeof AdminRoute
   '/beliefs': typeof BeliefsRoute
   '/blog': typeof BlogRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/accessibility': typeof AccessibilityRoute
+  '/admin': typeof AdminRoute
   '/beliefs': typeof BeliefsRoute
   '/blog': typeof BlogRoute
   '/children-and-families': typeof ChildrenAndFamiliesRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/accessibility'
+    | '/admin'
     | '/beliefs'
     | '/blog'
     | '/children-and-families'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/accessibility'
+    | '/admin'
     | '/beliefs'
     | '/blog'
     | '/children-and-families'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/accessibility'
+    | '/admin'
     | '/beliefs'
     | '/blog'
     | '/children-and-families'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccessibilityRoute: typeof AccessibilityRoute
+  AdminRoute: typeof AdminRoute
   BeliefsRoute: typeof BeliefsRoute
   BlogRoute: typeof BlogRoute
   ChildrenAndFamiliesRoute: typeof ChildrenAndFamiliesRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/accessibility'
       fullPath: '/accessibility'
       preLoaderRoute: typeof AccessibilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/beliefs': {
@@ -359,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccessibilityRoute: AccessibilityRoute,
+  AdminRoute: AdminRoute,
   BeliefsRoute: BeliefsRoute,
   BlogRoute: BlogRoute,
   ChildrenAndFamiliesRoute: ChildrenAndFamiliesRoute,
