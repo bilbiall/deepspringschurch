@@ -165,12 +165,33 @@ function PlanYourVisit() {
           />
           <form
             className="card-soft mt-10 space-y-6 p-8"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              toast.success("Thank you. We look forward to meeting you at Deep Spring.");
-              (e.target as HTMLFormElement).reset();
-              setConsent(false);
+              const form = e.currentTarget;
+              const fd = new FormData(form);
+              const get = (k: string) => String(fd.get(k) ?? "");
+              try {
+                await submitVisitPlan({
+                  data: {
+                    name: get("name"),
+                    email: get("email"),
+                    phone: get("phone"),
+                    preferred_contact: get("preferred_contact"),
+                    adults: Number(fd.get("adults") ?? 1),
+                    children: Number(fd.get("children") ?? 0),
+                    accessibility_needs: get("accessibility_needs"),
+                    accommodation_needs: get("accommodation_needs"),
+                    prayer_request: get("prayer_request"),
+                  },
+                });
+                toast.success("Thank you. We look forward to meeting you at Deep Spring.");
+                form.reset();
+                setConsent(false);
+              } catch {
+                toast.error("We could not save your details. Please try again.");
+              }
             }}
+
           >
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Your name" required>
