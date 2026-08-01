@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, Phone, Clock } from "lucide-react";
-import logo from "@/assets/deep-spring-logo.png.asset.json";
+import logo from "@/assets/deep-spring-logo-mark.png.asset.json";
 import { SITE, SOCIAL_LINKS } from "@/lib/site";
 
 const PRIMARY_LINKS = [

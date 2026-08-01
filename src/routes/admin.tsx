@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
-import logo from "@/assets/deep-spring-logo.png.asset.json";
+import logo from "@/assets/deep-spring-logo-mark.png.asset.json";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
