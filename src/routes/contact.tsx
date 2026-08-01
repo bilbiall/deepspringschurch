@@ -109,20 +109,38 @@ function Contact() {
             <SectionHeading eyebrow="Send a message" title="How can we help?" />
             <form
               className="card-soft mt-8 space-y-6 p-8"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 if (honeypot) return;
+                const form = e.currentTarget;
+                const fd = new FormData(form);
                 setSending(true);
-                setTimeout(() => {
-                  setSending(false);
+                try {
+                  await submitContactMessage({
+                    data: {
+                      name: String(fd.get("name") ?? ""),
+                      email: String(fd.get("email") ?? ""),
+                      phone: String(fd.get("phone") ?? ""),
+                      inquiry_type: String(fd.get("inquiry_type") ?? ""),
+                      subject: String(fd.get("subject") ?? ""),
+                      message: String(fd.get("message") ?? ""),
+                      is_prayer_request: isPrayer,
+                      company: "",
+                    },
+                  });
                   toast.success("Message sent", {
                     description: "Thank you for reaching out. Someone will respond soon.",
                   });
-                  (e.target as HTMLFormElement).reset();
+                  form.reset();
                   setConsent(false);
                   setIsPrayer(false);
-                }, 500);
+                } catch {
+                  toast.error("Your message could not be sent. Please try again.");
+                } finally {
+                  setSending(false);
+                }
               }}
+
             >
               {/* Simple spam trap — hidden from users and assistive technology */}
               <div className="hidden" aria-hidden="true">
