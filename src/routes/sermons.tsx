@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { Search, Play } from "lucide-react";
 import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
+import { listPublishedSermons } from "@/lib/public-content.functions";
+
+type SermonRow = Database["public"]["Tables"]["sermons"]["Row"];
 
 export const Route = createFileRoute("/sermons")({
   head: () =>
@@ -13,26 +17,20 @@ export const Route = createFileRoute("/sermons")({
         "Watch and listen to teaching from Deep Spring Church of the Nazarene in Glenn Heights, Texas. Browse by series, speaker, topic and Scripture.",
       path: "/sermons",
     }),
+  loader: () => listPublishedSermons(),
   component: Sermons,
 });
-
-type Sermon = {
-  slug: string;
-  title: string;
-  speaker: string;
-  series: string;
-  scripture: string;
-  date: string;
-  summary: string;
-};
-
-/** Published sermons are managed by administrators. */
-const SERMONS: Sermon[] = [];
 
 const FILTERS = ["Series", "Speaker", "Year", "Topic", "Bible book"];
 
 function Sermons() {
+  const sermons = Route.useLoaderData() as SermonRow[];
   const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const results = sermons.filter((s) =>
+    [s.title, s.speaker, s.series, s.scripture].filter(Boolean).join(" ").toLowerCase().includes(q),
+  );
+  const featured = sermons[0];
 
   return (
     <>
@@ -55,12 +53,28 @@ function Sermons() {
                 </span>
               </div>
               <div className="p-8">
-                <p className="eyebrow">Coming soon</p>
-                <h3 className="mt-3 text-2xl">Our first message will appear here</h3>
+                <p className="eyebrow">{featured ? "Most recent" : "Coming soon"}</p>
+                <h3 className="mt-3 text-2xl">
+                  {featured ? featured.title : "Our first message will appear here"}
+                </h3>
                 <p className="mt-4 leading-relaxed text-muted-foreground">
-                  Once services begin, the newest sermon will be featured here with video,
-                  audio, Scripture references and downloadable notes.
+                  {featured
+                    ? (featured.description ??
+                      [featured.speaker, featured.scripture].filter(Boolean).join(" · "))
+                    : "Once services begin, the newest sermon will be featured here with video, audio, Scripture references and downloadable notes."}
                 </p>
+                {featured?.video_url || featured?.audio_url ? (
+                  <p className="mt-5">
+                    <ActionLink
+                      href={(featured.video_url ?? featured.audio_url)!}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      size="sm"
+                    >
+                      Watch or listen
+                    </ActionLink>
+                  </p>
+                ) : null}
                 <p className="mt-6 text-sm text-muted-foreground">
                   Join us Sunday at {SITE.serviceTime} · {SITE.addressOneLine}
                 </p>
@@ -108,13 +122,52 @@ function Sermons() {
           </div>
 
           <div className="mt-10">
-            {SERMONS.length === 0 ? (
+            {results.length === 0 ? (
               <EmptyState message="No sermons have been published yet. Filters and search will become active as messages are added to the library.">
                 <ActionLink to="/plan-your-visit" size="sm">
                   Join Us Sunday
                 </ActionLink>
               </EmptyState>
-            ) : null}
+            ) : (
+              <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {results.map((s) => (
+                  <li key={s.id} className="card-soft card-hover flex h-full flex-col p-7">
+                    {s.series ? <p className="eyebrow">{s.series}</p> : null}
+                    <h3 className="mt-2 text-xl">{s.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {[s.speaker, s.scripture].filter(Boolean).join(" · ")}
+                    </p>
+                    {s.description ? (
+                      <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                        {s.description}
+                      </p>
+                    ) : null}
+                    <p className="mt-4 text-xs tracking-wide text-muted-foreground uppercase">
+                      {s.preached_on
+                        ? new Date(s.preached_on).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : ""}
+                    </p>
+                    {s.video_url || s.audio_url ? (
+                      <div className="mt-5">
+                        <ActionLink
+                          href={(s.video_url ?? s.audio_url)!}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          variant="outline"
+                          size="sm"
+                        >
+                          Watch or listen
+                        </ActionLink>
+                      </div>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </section>

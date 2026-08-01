@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { pageMeta } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
+import { listPublishedPosts } from "@/lib/public-content.functions";
+
+type PostRow = Database["public"]["Tables"]["blog_posts"]["Row"];
 
 export const Route = createFileRoute("/blog")({
   head: () =>
@@ -12,6 +16,7 @@ export const Route = createFileRoute("/blog")({
         "Articles and resources on faith, spiritual growth, community, relationships, family, prayer and discipleship from Deep Spring Church of the Nazarene.",
       path: "/blog",
     }),
+  loader: () => listPublishedPosts(),
   component: Blog,
 });
 
@@ -26,12 +31,16 @@ const CATEGORIES = [
   "Resources",
 ];
 
-type Post = { slug: string; title: string; excerpt: string; category: string; date: string };
-const POSTS: Post[] = [];
-
 function Blog() {
+  const posts = Route.useLoaderData() as PostRow[];
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(null);
+  const q = query.trim().toLowerCase();
+  const results = posts.filter(
+    (p) =>
+      (!active || p.category === active) &&
+      [p.title, p.excerpt, p.category, p.author].filter(Boolean).join(" ").toLowerCase().includes(q),
+  );
 
   return (
     <>
@@ -82,7 +91,7 @@ function Blog() {
           </div>
 
           <div className="mt-12">
-            {POSTS.length === 0 ? (
+            {results.length === 0 ? (
               <EmptyState
                 title="No articles published yet"
                 message="Deep Spring has not published its first article. Rather than fill this page with placeholder writing, we are leaving it open until there is something worth reading."
@@ -91,7 +100,45 @@ function Blog() {
                   Suggest a Topic
                 </ActionLink>
               </EmptyState>
-            ) : null}
+            ) : (
+              <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {results.map((p) => (
+                  <li key={p.id} className="card-soft card-hover flex h-full flex-col overflow-hidden">
+                    {p.cover_image_url ? (
+                      <img
+                        src={p.cover_image_url}
+                        alt=""
+                        loading="lazy"
+                        className="h-44 w-full object-cover"
+                      />
+                    ) : null}
+                    <div className="flex flex-1 flex-col p-7">
+                      {p.category ? <p className="eyebrow">{p.category}</p> : null}
+                      <h3 className="mt-2 text-xl">{p.title}</h3>
+                      {p.excerpt ? (
+                        <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                          {p.excerpt}
+                        </p>
+                      ) : null}
+                      <p className="mt-4 text-xs tracking-wide text-muted-foreground uppercase">
+                        {[
+                          p.author,
+                          p.published_at
+                            ? new Date(p.published_at).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="mt-16">

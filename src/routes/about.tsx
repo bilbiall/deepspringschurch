@@ -3,6 +3,15 @@ import { pageMeta, SITE } from "@/lib/site";
 import { Reveal } from "@/components/Reveal";
 import { PageHero, SectionHeading, ActionLink } from "@/components/ui-kit";
 import { LEADERSHIP } from "@/content/church";
+import kenPhoto from "@/assets/ken-merrifield.png.asset.json";
+import janetPhoto from "@/assets/janet-merrifield.webp.asset.json";
+import familyPhoto from "@/assets/merrifield-family.png.asset.json";
+import couplePhoto from "@/assets/ken-and-janet.png.asset.json";
+
+const LEADER_PHOTOS: Record<string, { url: string; alt: string }> = {
+  "Pastor Ken Merrifield": { url: kenPhoto.url, alt: "Pastor Ken Merrifield" },
+  "Janet Merrifield": { url: janetPhoto.url, alt: "Janet Merrifield" },
+};
 
 export const Route = createFileRoute("/about")({
   head: () =>
@@ -125,6 +134,44 @@ function About() {
       <section className="section-y bg-background">
         <div className="container-page">
           <SectionHeading
+            eyebrow="Our family"
+            title="Ken and Janet Merrifield"
+            align="center"
+            intro="Ken and Janet have six children, including children welcomed through adoption and foster care, and fourteen grandchildren."
+          />
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            <Reveal>
+              <figure className="overflow-hidden rounded-3xl border border-border">
+                <img
+                  src={couplePhoto.url}
+                  alt="Ken and Janet Merrifield standing together outdoors at sunset"
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              </figure>
+            </Reveal>
+            <Reveal delay={0.12}>
+              <figure className="overflow-hidden rounded-3xl border border-border">
+                <img
+                  src={familyPhoto.url}
+                  alt="Janet and Ken Merrifield with their children outdoors at sunset"
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+                <figcaption className="bg-cream px-6 py-4 text-sm text-muted-foreground">
+                  Janet, Ken and family.
+                </figcaption>
+              </figure>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+
+
+      <section className="section-y bg-background">
+        <div className="container-page">
+          <SectionHeading
             eyebrow="Our approach"
             title="Simple, relational, and grounded in Scripture"
             align="center"
@@ -156,30 +203,41 @@ function About() {
             intro="Additional staff, board members, ministry leaders and volunteers will be added here as the church grows."
           />
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            {LEADERSHIP.map((person, i) => (
+            {LEADERSHIP.map((person, i) => {
+              const photo = LEADER_PHOTOS[person.name];
+              return (
               <Reveal as="article" key={person.name} delay={i * 0.1}>
                 <div className="card-soft card-hover h-full overflow-hidden">
                   <div className="flex items-center gap-5 border-b border-border bg-cream p-8">
-                    <div
-                      className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-2xl text-primary"
-                      aria-hidden="true"
-                    >
-                      {person.name
-                        .replace("Pastor ", "")
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </div>
+                    {photo ? (
+                      <img
+                        src={photo.url}
+                        alt={photo.alt}
+                        width={160}
+                        height={160}
+                        loading="lazy"
+                        className="h-24 w-24 shrink-0 rounded-full border border-border object-cover"
+                      />
+                    ) : (
+                      <div
+                        className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-2xl text-primary"
+                        aria-hidden="true"
+                      >
+                        {person.name
+                          .replace("Pastor ", "")
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                    )}
                     <div>
                       <h3 className="text-2xl">{person.name}</h3>
                       <p className="mt-1 text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                         {person.role}
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Photograph coming soon.
-                      </p>
                     </div>
                   </div>
+
                   <div className="space-y-4 p-8 leading-relaxed text-muted-foreground">
                     {person.bio.map((para) => (
                       <p key={para.slice(0, 30)}>{para}</p>
@@ -187,7 +245,8 @@ function About() {
                   </div>
                 </div>
               </Reveal>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-12 flex flex-wrap gap-3">
             <ActionLink to="/plan-your-visit">Plan Your Visit</ActionLink>
