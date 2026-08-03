@@ -15,6 +15,7 @@ import {
   GRAND_OPENING,
 } from "@/content/church";
 import { listPublishedSermons, listPublishedPosts } from "@/lib/public-content.functions";
+import { safeLoad } from "@/lib/safe-load";
 
 export const Route = createFileRoute("/")({
   head: () =>
@@ -26,7 +27,10 @@ export const Route = createFileRoute("/")({
       image: `${SITE.domain}/og-image.png`,
     }),
   loader: async () => {
-    const [sermons, posts] = await Promise.all([listPublishedSermons(), listPublishedPosts()]);
+    const [sermons, posts] = await Promise.all([
+      safeLoad(() => listPublishedSermons(), [] as Awaited<ReturnType<typeof listPublishedSermons>>),
+      safeLoad(() => listPublishedPosts(), [] as Awaited<ReturnType<typeof listPublishedPosts>>),
+    ]);
     return { sermons: sermons.slice(0, 3), posts: posts.slice(0, 3) };
   },
   component: Home,
