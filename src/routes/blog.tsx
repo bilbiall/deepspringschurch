@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { pageMeta } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { listPublishedPosts } from "@/lib/public-content.functions";
+import { safeLoad } from "@/lib/safe-load";
 
 type PostRow = Database["public"]["Tables"]["blog_posts"]["Row"];
 
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/blog")({
         "Articles and resources on faith, spiritual growth, community, relationships, family, prayer and discipleship from Deep Spring Church of the Nazarene.",
       path: "/blog",
     }),
-  loader: () => listPublishedPosts(),
+  loader: () => safeLoad(() => listPublishedPosts(), []),
   component: Blog,
 });
 

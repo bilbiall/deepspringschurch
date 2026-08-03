@@ -6,6 +6,7 @@ import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { listPublishedSermons } from "@/lib/public-content.functions";
+import { safeLoad } from "@/lib/safe-load";
 
 type SermonRow = Database["public"]["Tables"]["sermons"]["Row"];
 
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/sermons")({
         "Watch and listen to teaching from Deep Spring Church of the Nazarene in Glenn Heights, Texas. Browse by series, speaker, topic and Scripture.",
       path: "/sermons",
     }),
-  loader: () => listPublishedSermons(),
+  loader: () => safeLoad(() => listPublishedSermons(), []),
   component: Sermons,
 });
 

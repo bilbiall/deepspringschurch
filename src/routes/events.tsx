@@ -8,6 +8,7 @@ import { PageHero, SectionHeading, EmptyState, ActionLink, ActionButton } from "
 import { Reveal } from "@/components/Reveal";
 import { GRAND_OPENING } from "@/content/church";
 import { listPublishedEvents } from "@/lib/public-content.functions";
+import { safeLoad } from "@/lib/safe-load";
 
 type EventRow = Database["public"]["Tables"]["events"]["Row"];
 
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/events")({
         "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including our Grand Opening on October 4 and Sunday services at 10:30 AM.",
       path: "/events",
     }),
-  loader: () => listPublishedEvents(),
+  loader: () => safeLoad(() => listPublishedEvents(), []),
   component: Events,
 });
 

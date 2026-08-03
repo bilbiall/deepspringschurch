@@ -7,6 +7,7 @@ import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { listPublishedGroups } from "@/lib/public-content.functions";
+import { safeLoad } from "@/lib/safe-load";
 
 type GroupRow = Database["public"]["Tables"]["connection_groups"]["Row"];
 
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/connection-groups")({
         "Connection Groups are small groups of three to five people at Deep Spring Church, built for deep relationships, prayer, honest conversation and growth in Christ.",
       path: "/connection-groups",
     }),
-  loader: () => listPublishedGroups(),
+  loader: () => safeLoad(() => listPublishedGroups(), []),
   component: ConnectionGroups,
 });
 
