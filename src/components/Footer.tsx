@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, Phone, Clock } from "lucide-react";
-import logo from "@/assets/deep-spring-logo-mark.png.asset.json";
+import logo from "@/assets/logo.png";
 import { SITE, SOCIAL_LINKS } from "@/lib/site";
 
 const PRIMARY_LINKS = [
@@ -36,7 +36,7 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <img
-              src={logo.url}
+              src={logo}
               alt={`${SITE.name} logo`}
               width={96}
               height={96}

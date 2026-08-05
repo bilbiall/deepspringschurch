@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X, Phone, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import logo from "@/assets/deep-spring-logo-mark.png.asset.json";
+import logo from "@/assets/logo.png";
 import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -100,7 +100,7 @@ export function Header() {
             )}
           >
             <img
-              src={logo.url}
+              src={logo}
               alt={`${SITE.name} logo`}
               width={56}
               height={56}
