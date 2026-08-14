@@ -177,7 +177,7 @@ export const SUBMISSION_TABLES: SubmissionTable[] = [
       { name: "donor_name", label: "Donor" },
       { name: "donor_email", label: "Email" },
       { name: "fund", label: "Fund" },
-      { name: "amount_cents", label: "Amount (cents)" },
+      { name: "amount_cents", label: "Amount" },
       { name: "frequency", label: "Frequency" },
       { name: "status", label: "Status" },
     ],
