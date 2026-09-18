@@ -16,7 +16,11 @@ export const Route = createFileRoute("/give")({
     donation: z.enum(["success", "cancelled"]).optional(),
   }),
   loader: () =>
-    safeLoad(() => getPublicPaymentStatus(), { active: false, achEnabled: false, tithelyUrl: null }),
+    safeLoad(() => getPublicPaymentStatus(), {
+      active: false,
+      achEnabled: false,
+      tithelyUrl: null,
+    }),
   head: () =>
     pageMeta({
       title: "Give | Deep Spring Church of the Nazarene",
@@ -239,182 +243,189 @@ function GivePage() {
             </div>
           ) : null}
 
-          <form className="card-soft mt-8 space-y-7 p-8" onSubmit={(e) => void handleSubmit(e)}>
-            <fieldset>
-              <legend className="text-sm font-semibold text-foreground">Donation amount</legend>
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                {AMOUNTS.map((a) => (
+          {paymentsConfigured ? (
+            <form className="card-soft mt-8 space-y-7 p-8" onSubmit={(e) => void handleSubmit(e)}>
+              <fieldset>
+                <legend className="text-sm font-semibold text-foreground">Donation amount</legend>
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                  {AMOUNTS.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAmount(a)}
+                      aria-pressed={amount === a}
+                      className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
+                        amount === a
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input bg-background text-foreground hover:border-primary/50"
+                      }`}
+                    >
+                      ${a}
+                    </button>
+                  ))}
                   <button
-                    key={a}
                     type="button"
-                    onClick={() => setAmount(a)}
-                    aria-pressed={amount === a}
+                    onClick={() => setAmount("custom")}
+                    aria-pressed={amount === "custom"}
                     className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
-                      amount === a
+                      amount === "custom"
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-input bg-background text-foreground hover:border-primary/50"
                     }`}
                   >
-                    ${a}
+                    Custom
                   </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setAmount("custom")}
-                  aria-pressed={amount === "custom"}
-                  className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
-                    amount === "custom"
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-input bg-background text-foreground hover:border-primary/50"
-                  }`}
-                >
-                  Custom
-                </button>
-              </div>
-              {amount === "custom" ? (
-                <div className="mt-4">
-                  <Field label="Custom amount (USD)" required>
-                    {(p) => (
-                      <input
-                        {...p}
-                        name="custom_amount"
-                        type="number"
-                        min={1}
-                        step="0.01"
-                        required
-                      />
-                    )}
-                  </Field>
                 </div>
-              ) : null}
-            </fieldset>
+                {amount === "custom" ? (
+                  <div className="mt-4">
+                    <Field label="Custom amount (USD)" required>
+                      {(p) => (
+                        <input
+                          {...p}
+                          name="custom_amount"
+                          type="number"
+                          min={1}
+                          step="0.01"
+                          required
+                        />
+                      )}
+                    </Field>
+                  </div>
+                ) : null}
+              </fieldset>
 
-            <Field label="Giving fund" required>
-              {(p) => (
-                <select {...p} name="fund" value={fund} onChange={(e) => setFund(e.target.value)}>
-                  {GIVING_FUNDS.map((f) => (
-                    <option key={f.slug} value={f.slug}>
-                      {f.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </Field>
-
-            {fund === "other" ? (
-              <Field label="Purpose of this gift" required>
-                {(p) => <input {...p} name="fund_other" type="text" required />}
+              <Field label="Giving fund" required>
+                {(p) => (
+                  <select {...p} name="fund" value={fund} onChange={(e) => setFund(e.target.value)}>
+                    {GIVING_FUNDS.map((f) => (
+                      <option key={f.slug} value={f.slug}>
+                        {f.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </Field>
-            ) : null}
 
-            <fieldset>
-              <legend className="text-sm font-semibold text-foreground">Frequency</legend>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                {(
-                  [
-                    { v: "one-time", l: "One-time" },
-                    { v: "weekly", l: "Weekly" },
-                    { v: "monthly", l: "Monthly" },
-                  ] as const
-                ).map((f) => (
-                  <label
-                    key={f.v}
-                    className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors ${
-                      frequency === f.v ? "border-primary bg-accent" : "border-input"
-                    }`}
-                  >
+              {fund === "other" ? (
+                <Field label="Purpose of this gift" required>
+                  {(p) => <input {...p} name="fund_other" type="text" required />}
+                </Field>
+              ) : null}
+
+              <fieldset>
+                <legend className="text-sm font-semibold text-foreground">Frequency</legend>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  {(
+                    [
+                      { v: "one-time", l: "One-time" },
+                      { v: "weekly", l: "Weekly" },
+                      { v: "monthly", l: "Monthly" },
+                    ] as const
+                  ).map((f) => (
+                    <label
+                      key={f.v}
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors ${
+                        frequency === f.v ? "border-primary bg-accent" : "border-input"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="frequency"
+                        value={f.v}
+                        checked={frequency === f.v}
+                        onChange={() => setFrequency(f.v)}
+                        className="accent-[oklch(0.46_0.072_214)]"
+                      />
+                      {f.l}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                <Field label="Your name">
+                  {(p) => (
                     <input
-                      type="radio"
-                      name="frequency"
-                      value={f.v}
-                      checked={frequency === f.v}
-                      onChange={() => setFrequency(f.v)}
-                      className="accent-[oklch(0.46_0.072_214)]"
+                      {...p}
+                      name="donor_name"
+                      type="text"
+                      autoComplete="name"
+                      disabled={anonymous}
                     />
-                    {f.l}
-                  </label>
-                ))}
+                  )}
+                </Field>
+                <Field label="Email address" required hint="Used to send your receipt.">
+                  {(p) => (
+                    <input {...p} name="donor_email" type="email" required autoComplete="email" />
+                  )}
+                </Field>
               </div>
-            </fieldset>
+              <Field label="Phone number">
+                {(p) => <input {...p} name="donor_phone" type="tel" autoComplete="tel" />}
+              </Field>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              <Field label="Your name">
+              <div className="flex items-start gap-3">
+                <input
+                  id="anon"
+                  type="checkbox"
+                  checked={anonymous}
+                  onChange={(e) => setAnonymous(e.target.checked)}
+                  className="mt-1 h-5 w-5 rounded border-input accent-[oklch(0.46_0.072_214)]"
+                />
+                <label htmlFor="anon" className="text-sm text-muted-foreground">
+                  Give anonymously (your name will not be recorded with this gift)
+                </label>
+              </div>
+
+              <Field label="Dedication">
                 {(p) => (
                   <input
                     {...p}
-                    name="donor_name"
+                    name="dedication"
                     type="text"
-                    autoComplete="name"
-                    disabled={anonymous}
+                    placeholder="In honour or memory of…"
                   />
                 )}
               </Field>
-              <Field label="Email address" required hint="Used to send your receipt.">
-                {(p) => (
-                  <input {...p} name="donor_email" type="email" required autoComplete="email" />
-                )}
+              <Field label="Message to the church">
+                {(p) => <textarea {...p} name="donor_message" rows={3} />}
               </Field>
-            </div>
-            <Field label="Phone number">
-              {(p) => <input {...p} name="donor_phone" type="tel" autoComplete="tel" />}
-            </Field>
 
-            <div className="flex items-start gap-3">
-              <input
-                id="anon"
-                type="checkbox"
-                checked={anonymous}
-                onChange={(e) => setAnonymous(e.target.checked)}
-                className="mt-1 h-5 w-5 rounded border-input accent-[oklch(0.46_0.072_214)]"
-              />
-              <label htmlFor="anon" className="text-sm text-muted-foreground">
-                Give anonymously (your name will not be recorded with this gift)
-              </label>
-            </div>
+              <div className="flex items-start gap-3">
+                <input
+                  id="fees"
+                  type="checkbox"
+                  name="cover_fees"
+                  className="mt-1 h-5 w-5 rounded border-input accent-[oklch(0.46_0.072_214)]"
+                />
+                <label htmlFor="fees" className="text-sm text-muted-foreground">
+                  I would like to cover the payment processing fee so the full gift reaches the
+                  ministry (entirely optional).
+                </label>
+              </div>
 
-            <Field label="Dedication">
-              {(p) => (
-                <input {...p} name="dedication" type="text" placeholder="In honour or memory of…" />
-              )}
-            </Field>
-            <Field label="Message to the church">
-              {(p) => <textarea {...p} name="donor_message" rows={3} />}
-            </Field>
+              <Consent checked={consent} onChange={setConsent}>
+                I consent to Deep Spring Church processing this gift and sending me a receipt by
+                email.
+              </Consent>
 
-            <div className="flex items-start gap-3">
-              <input
-                id="fees"
-                type="checkbox"
-                name="cover_fees"
-                className="mt-1 h-5 w-5 rounded border-input accent-[oklch(0.46_0.072_214)]"
-              />
-              <label htmlFor="fees" className="text-sm text-muted-foreground">
-                I would like to cover the payment processing fee so the full gift reaches the
-                ministry (entirely optional).
-              </label>
-            </div>
+              <PrivacyNotice>
+                Payments are handled entirely by a secure external payment processor. Deep Spring
+                never receives or stores card numbers, security codes or bank credentials.
+              </PrivacyNotice>
 
-            <Consent checked={consent} onChange={setConsent}>
-              I consent to Deep Spring Church processing this gift and sending me a receipt by
-              email.
-            </Consent>
-
-            <PrivacyNotice>
-              Payments are handled entirely by a secure external payment processor. Deep Spring
-              never receives or stores card numbers, security codes or bank credentials.
-            </PrivacyNotice>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <ActionButton type="submit" size="lg" disabled={submitting}>
-                <Lock className="h-4 w-4" aria-hidden="true" />
-                {submitting ? "Redirecting to secure checkout…" : "Give Securely"}
-              </ActionButton>
-              <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                Encrypted connection · No card details stored by the church
-              </span>
-            </div>
-          </form>
+              <div className="flex flex-wrap items-center gap-4">
+                <ActionButton type="submit" size="lg" disabled={submitting}>
+                  <Lock className="h-4 w-4" aria-hidden="true" />
+                  {submitting ? "Redirecting to secure checkout…" : "Give Securely"}
+                </ActionButton>
+                <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                  <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                  Encrypted connection · No card details stored by the church
+                </span>
+              </div>
+            </form>
+          ) : null}
 
           {tithelyUrl ? (
             <div className="card-soft mt-6 flex flex-wrap items-center justify-between gap-4 p-6">
