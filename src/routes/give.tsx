@@ -15,7 +15,8 @@ export const Route = createFileRoute("/give")({
   validateSearch: z.object({
     donation: z.enum(["success", "cancelled"]).optional(),
   }),
-  loader: () => safeLoad(() => getPublicPaymentStatus(), { active: false, achEnabled: false }),
+  loader: () =>
+    safeLoad(() => getPublicPaymentStatus(), { active: false, achEnabled: false, tithelyUrl: null }),
   head: () =>
     pageMeta({
       title: "Give | Deep Spring Church of the Nazarene",
@@ -75,7 +76,7 @@ const SCRIPTURES = [
 const AMOUNTS = [25, 50, 100, 250];
 
 function GivePage() {
-  const { active: paymentsConfigured } = Route.useLoaderData();
+  const { active: paymentsConfigured, tithelyUrl } = Route.useLoaderData();
   const { donation } = Route.useSearch();
   const [fund, setFund] = useState(GIVING_FUNDS[0]!.slug);
   const [amount, setAmount] = useState<number | "custom">(50);
@@ -414,6 +415,17 @@ function GivePage() {
               </span>
             </div>
           </form>
+
+          {tithelyUrl ? (
+            <div className="card-soft mt-6 flex flex-wrap items-center justify-between gap-4 p-6">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Prefer to give through the Tithe.ly app or site instead?
+              </p>
+              <ActionLink href={tithelyUrl} target="_blank" rel="noreferrer" variant="outline">
+                Give via Tithe.ly ↗
+              </ActionLink>
+            </div>
+          ) : null}
         </div>
       </section>
 

@@ -61,3 +61,44 @@ export const testStripeConnection = createServerFn({ method: "POST" })
     await retrieveBalance(secretKey);
     return { ok: true as const };
   });
+
+export const getTithelySettingsStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId, context.supabase);
+    const { getIntegrationStatus } = await import("@/lib/secrets.server");
+    return getIntegrationStatus("tithely");
+  });
+
+const tithelySchema = z.object({
+  url: z.string().trim().max(500).optional().default(""),
+  isActive: z.boolean().default(false),
+});
+
+export const saveTithelySettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => tithelySchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId, context.supabase);
+
+    if (data.url) {
+      let valid = false;
+      try {
+        valid = new URL(data.url).protocol === "https:";
+      } catch {
+        valid = false;
+      }
+      if (!valid) throw new Error("Enter a valid https:// Tithe.ly giving link.");
+    }
+    if (data.isActive && !data.url) {
+      throw new Error("Add a Tithe.ly giving link before turning this on.");
+    }
+
+    const { setIntegrationCredentials } = await import("@/lib/secrets.server");
+    await setIntegrationCredentials("tithely", {
+      isActive: data.isActive,
+      updatedBy: context.userId,
+      publicValue: data.url,
+    });
+    return { ok: true as const };
+  });

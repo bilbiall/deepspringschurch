@@ -26,10 +26,15 @@ const checkoutSchema = z
 
 export const getPublicPaymentStatus = createServerFn({ method: "GET" }).handler(async () => {
   const { getIntegrationStatus } = await import("@/lib/secrets.server");
-  const status = await getIntegrationStatus("stripe");
+  const [stripeStatus, tithelyStatus] = await Promise.all([
+    getIntegrationStatus("stripe"),
+    getIntegrationStatus("tithely"),
+  ]);
   return {
-    active: status.configured && status.isActive,
-    achEnabled: status.achEnabled,
+    active: stripeStatus.configured && stripeStatus.isActive,
+    achEnabled: stripeStatus.achEnabled,
+    tithelyUrl:
+      tithelyStatus.isActive && tithelyStatus.publicValue ? tithelyStatus.publicValue : null,
   };
 });
 

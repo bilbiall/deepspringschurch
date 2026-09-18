@@ -5,6 +5,8 @@ import {
   getPaymentSettingsStatus,
   savePaymentSettings,
   testStripeConnection,
+  getTithelySettingsStatus,
+  saveTithelySettings,
 } from "@/lib/payment-settings.functions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -162,6 +164,99 @@ function SecretInput({
         {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </button>
     </div>
+  );
+}
+
+type TithelyStatus = Awaited<ReturnType<typeof getTithelySettingsStatus>>;
+
+function TithelySettings() {
+  const [status, setStatus] = useState<TithelyStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [url, setUrl] = useState("");
+  const [isActive, setIsActive] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const s = await getTithelySettingsStatus();
+      setStatus(s);
+      setUrl(s.publicValue ?? "");
+      setIsActive(s.isActive);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load Tithe.ly settings");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await saveTithelySettings({ data: { url, isActive } });
+      toast.success("Tithe.ly settings saved");
+      void load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save Tithe.ly settings");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) return null;
+
+  const live = Boolean(status?.isActive && status.publicValue);
+
+  return (
+    <form onSubmit={save} className="card-soft space-y-5 p-6">
+      <div>
+        <p className="text-sm font-semibold text-ink">
+          Tithe.ly (alternate giving link) {live ? "· showing on Give page" : ""}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Optional. Adds a "Give via Tithe.ly" link on the public Give page that opens your
+          Tithe.ly giving page in a new tab. Gifts made there are tracked by Tithe.ly, not by this
+          site — they won't appear in Giving Reports.
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="tithely-url" className={fieldLabelClass()}>
+          Tithe.ly giving link
+        </label>
+        <input
+          id="tithely-url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://give.tithe.ly/?formId=…"
+          autoComplete="off"
+          className={inputClass()}
+        />
+      </div>
+
+      <label className="flex items-center gap-3 text-sm text-foreground">
+        <input
+          type="checkbox"
+          checked={isActive}
+          onChange={(e) => setIsActive(e.target.checked)}
+          className="h-4 w-4 rounded border-border"
+        />
+        Show this link on the public Give page
+      </label>
+
+      <button
+        type="submit"
+        disabled={saving}
+        className="rounded-full border border-border px-6 py-2.5 text-xs font-semibold tracking-wider uppercase disabled:opacity-60"
+      >
+        {saving ? "Saving…" : "Save Tithe.ly settings"}
+      </button>
+    </form>
   );
 }
 
@@ -364,6 +459,8 @@ export function PaymentSettingsPanel() {
           {saving ? "Saving…" : "Save settings"}
         </button>
       </form>
+
+      <TithelySettings />
     </div>
   );
 }
