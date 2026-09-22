@@ -3,21 +3,6 @@ import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/r
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
-// Stripe posts webhook events to a plain HTTP endpoint (no router file-route
-// mechanism exists in this TanStack Start version, and a webhook needs the
-// raw body for signature verification anyway) — a requestMiddleware is the
-// only hook that sees every incoming request before the router does, so it
-// intercepts this one path and returns the response directly, bypassing
-// routing entirely.
-const stripeWebhookMiddleware = createMiddleware().server(async ({ next, request }) => {
-  const url = new URL(request.url);
-  if (url.pathname === "/api/stripe-webhook" && request.method === "POST") {
-    const { handleStripeWebhook } = await import("./lib/stripe-webhook.server");
-    return handleStripeWebhook(request);
-  }
-  return next();
-});
-
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
     return await next();
@@ -42,5 +27,5 @@ const csrfMiddleware = createCsrfMiddleware({
 
 export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
-  requestMiddleware: [stripeWebhookMiddleware, errorMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, csrfMiddleware],
 }));
