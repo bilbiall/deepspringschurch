@@ -375,7 +375,10 @@ export function AdminDashboard({
             <h1 className="mt-3 font-display text-3xl text-ink md:text-4xl">
               Deep Spring control centre
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">Signed in as {email}</p>
+<p className="mt-2 text-sm text-muted-foreground">
+              Signed in as {email}
+              {isAdmin ? " · Administrator" : ""}
+            </p>
           </div>
           <button
             type="button"
@@ -410,15 +413,11 @@ export function AdminDashboard({
               key={current.id}
               table={CONTENT_TABLES.find((t) => t.key === current.id)!}
             />
-          ) : current.kind === "submission" ? (
+          ) : (
             <SubmissionsPanel
               key={current.id}
               table={SUBMISSION_TABLES.find((t) => t.key === current.id)!}
             />
-          ) : current.kind === "reports" ? (
-            <GivingReportsPanel key={current.id} />
-          ) : (
-            <PaymentSettingsPanel key={current.id} />
           )}
         </section>
       </div>
