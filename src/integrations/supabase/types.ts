@@ -220,12 +220,9 @@ export type Database = {
           fund: string
           id: string
           notes: string | null
-          payment_method_type: string | null
           provider: string | null
           provider_reference: string | null
           status: string
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
           updated_at: string
         }
         Insert: {
@@ -238,12 +235,9 @@ export type Database = {
           fund?: string
           id?: string
           notes?: string | null
-          payment_method_type?: string | null
           provider?: string | null
           provider_reference?: string | null
           status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -256,12 +250,9 @@ export type Database = {
           fund?: string
           id?: string
           notes?: string | null
-          payment_method_type?: string | null
           provider?: string | null
           provider_reference?: string | null
           status?: string
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -311,45 +302,6 @@ export type Database = {
           starts_at?: string
           title?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      integration_credentials: {
-        Row: {
-          ach_enabled: boolean
-          created_at: string
-          id: string
-          is_active: boolean
-          mode: string
-          provider: string
-          public_value: string | null
-          secrets: Json
-          updated_at: string
-          updated_by: string | null
-        }
-        Insert: {
-          ach_enabled?: boolean
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          mode?: string
-          provider: string
-          public_value?: string | null
-          secrets?: Json
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Update: {
-          ach_enabled?: boolean
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          mode?: string
-          provider?: string
-          public_value?: string | null
-          secrets?: Json
-          updated_at?: string
-          updated_by?: string | null
         }
         Relationships: []
       }
