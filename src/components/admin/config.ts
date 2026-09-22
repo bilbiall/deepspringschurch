@@ -22,8 +22,7 @@ export type SubmissionTable = {
     | "contact_messages"
     | "prayer_requests"
     | "visit_plans"
-    | "child_registrations"
-    | "donations";
+    | "child_registrations";
   label: string;
   orderBy: { column: string; ascending: boolean };
   columns: { name: string; label: string }[];
@@ -166,20 +165,6 @@ export const SUBMISSION_TABLES: SubmissionTable[] = [
       { name: "parent_phone", label: "Parent phone" },
       { name: "allergies", label: "Allergies" },
       { name: "special_needs", label: "Special needs" },
-    ],
-  },
-  {
-    key: "donations",
-    label: "Giving",
-    orderBy: { column: "created_at", ascending: false },
-    columns: [
-      { name: "created_at", label: "Date" },
-      { name: "donor_name", label: "Donor" },
-      { name: "donor_email", label: "Email" },
-      { name: "fund", label: "Fund" },
-      { name: "amount_cents", label: "Amount" },
-      { name: "frequency", label: "Frequency" },
-      { name: "status", label: "Status" },
     ],
   },
 ];
