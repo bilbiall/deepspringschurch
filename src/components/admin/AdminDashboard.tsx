@@ -10,8 +10,6 @@ import {
   type FieldDef,
   type SubmissionTable,
 } from "./config";
-import { PaymentSettingsPanel } from "./PaymentSettingsPanel";
-import { GivingReportsPanel } from "./GivingReportsPanel";
 
 const db = supabase as any;
 
@@ -362,14 +360,8 @@ export function AdminDashboard({
         label: t.label,
         kind: "submission" as const,
       })),
-      ...(isAdmin
-        ? [
-            { id: "giving-reports", label: "Giving Reports", kind: "reports" as const },
-            { id: "payment-settings", label: "Payment Settings", kind: "payment-settings" as const },
-          ]
-        : []),
     ],
-    [isAdmin],
+    [],
   );
   const [active, setActive] = useState(tabs[0]!.id);
   const current = tabs.find((t) => t.id === active)!;
