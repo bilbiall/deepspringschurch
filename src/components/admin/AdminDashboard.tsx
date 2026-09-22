@@ -10,13 +10,18 @@ import {
   type FieldDef,
   type SubmissionTable,
 } from "./config";
+import { PaymentSettingsPanel } from "./PaymentSettingsPanel";
+import { GivingReportsPanel } from "./GivingReportsPanel";
 
 const db = supabase as any;
 
 type Row = Record<string, any>;
 
-function formatValue(value: unknown) {
+function formatValue(value: unknown, key?: string) {
   if (value === null || value === undefined || value === "") return "—";
+  if (key === "amount_cents" && typeof value === "number") {
+    return (value / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
+  }
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
     return new Date(value).toLocaleString();
@@ -83,7 +88,7 @@ function SubmissionsPanel({ table }: { table: SubmissionTable }) {
                   {c.label}
                 </dt>
                 <dd className="mt-1 text-sm break-words text-foreground">
-                  {formatValue(row[c.name])}
+                  {formatValue(row[c.name], c.name)}
                 </dd>
               </div>
             ))}
@@ -340,7 +345,15 @@ function ContentPanel({ table }: { table: ContentTable }) {
   );
 }
 
-export function AdminDashboard({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+export function AdminDashboard({
+  email,
+  isAdmin,
+  onSignOut,
+}: {
+  email: string;
+  isAdmin: boolean;
+  onSignOut: () => void;
+}) {
   const tabs = useMemo(
     () => [
       ...CONTENT_TABLES.map((t) => ({ id: t.key, label: t.label, kind: "content" as const })),
@@ -349,8 +362,14 @@ export function AdminDashboard({ email, onSignOut }: { email: string; onSignOut:
         label: t.label,
         kind: "submission" as const,
       })),
+      ...(isAdmin
+        ? [
+            { id: "giving-reports", label: "Giving Reports", kind: "reports" as const },
+            { id: "payment-settings", label: "Payment Settings", kind: "payment-settings" as const },
+          ]
+        : []),
     ],
-    [],
+    [isAdmin],
   );
   const [active, setActive] = useState(tabs[0]!.id);
   const current = tabs.find((t) => t.id === active)!;
@@ -399,11 +418,15 @@ export function AdminDashboard({ email, onSignOut }: { email: string; onSignOut:
               key={current.id}
               table={CONTENT_TABLES.find((t) => t.key === current.id)!}
             />
-          ) : (
+          ) : current.kind === "submission" ? (
             <SubmissionsPanel
               key={current.id}
               table={SUBMISSION_TABLES.find((t) => t.key === current.id)!}
             />
+          ) : current.kind === "reports" ? (
+            <GivingReportsPanel key={current.id} />
+          ) : (
+            <PaymentSettingsPanel key={current.id} />
           )}
         </section>
       </div>

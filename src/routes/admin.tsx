@@ -27,6 +27,7 @@ function AdminRoute() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [busy, setBusy] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const check = useCallback(async () => {
     const { data } = await supabase.auth.getUser();
@@ -40,7 +41,9 @@ function AdminRoute() {
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id);
-    const isStaff = (roles ?? []).some((r: any) => r.role === "admin" || r.role === "editor");
+    const roleNames = (roles ?? []).map((r: any) => r.role);
+    setIsAdmin(roleNames.includes("admin"));
+    const isStaff = roleNames.includes("admin") || roleNames.includes("editor");
     setState(isStaff ? "ready" : "no-access");
   }, []);
 
@@ -133,7 +136,7 @@ function AdminRoute() {
   }
 
   if (state === "ready") {
-    return <AdminDashboard email={userEmail} onSignOut={signOut} />;
+    return <AdminDashboard email={userEmail} isAdmin={isAdmin} onSignOut={signOut} />;
   }
 
   return (
