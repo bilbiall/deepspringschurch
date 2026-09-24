@@ -17,7 +17,7 @@ export const Route = createFileRoute("/events")({
     pageMeta({
       title: "Events and Calendar | Deep Spring Church of the Nazarene",
       description:
-        "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including our Grand Opening on October 4 and Sunday services at 10:30 AM.",
+        "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including our Grand Opening on November 1 and Sunday services at 10:30 AM.",
       path: "/events",
     }),
   loader: () => safeLoad(() => listPublishedEvents(), []),
@@ -151,7 +151,7 @@ function Events() {
                 <li className="card-soft card-hover flex flex-wrap items-center justify-between gap-6 p-7">
                   <div>
                     <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                      October 4
+                      November 1
                     </p>
                     <h3 className="mt-2 text-xl">Grand Opening</h3>
                     <p className="mt-1 text-sm text-muted-foreground">

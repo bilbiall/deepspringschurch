@@ -42,6 +42,25 @@ export const submitContactMessage = createServerFn({ method: "POST" })
         is_confidential: true,
       });
     }
+
+    const { sendFormNotification } = await import("@/lib/mailer.server");
+    await sendFormNotification({
+      subject: `New contact message from ${rest.name}`,
+      text: [
+        `Name: ${rest.name}`,
+        `Email: ${rest.email}`,
+        rest.phone ? `Phone: ${rest.phone}` : null,
+        rest.inquiry_type ? `Inquiry type: ${rest.inquiry_type}` : null,
+        rest.subject ? `Subject: ${rest.subject}` : null,
+        is_prayer_request ? "This is also a prayer request." : null,
+        "",
+        rest.message,
+      ]
+        .filter((line) => line !== null)
+        .join("\n"),
+      replyTo: rest.email,
+    });
+
     return { ok: true as const };
   });
 
@@ -70,6 +89,25 @@ export const submitVisitPlan = createServerFn({ method: "POST" })
         request: data.prayer_request,
       });
     }
+
+    const { sendFormNotification } = await import("@/lib/mailer.server");
+    await sendFormNotification({
+      subject: `New visit plan from ${data.name}`,
+      text: [
+        `Name: ${data.name}`,
+        `Email: ${data.email}`,
+        data.phone ? `Phone: ${data.phone}` : null,
+        `Preferred contact: ${data.preferred_contact}`,
+        `Adults: ${data.adults}, Children: ${data.children}`,
+        data.accessibility_needs ? `Accessibility needs: ${data.accessibility_needs}` : null,
+        data.accommodation_needs ? `Accommodation needs: ${data.accommodation_needs}` : null,
+        data.prayer_request ? `Prayer request: ${data.prayer_request}` : null,
+      ]
+        .filter((line) => line !== null)
+        .join("\n"),
+      replyTo: data.email,
+    });
+
     return { ok: true as const };
   });
 
@@ -95,5 +133,29 @@ export const submitChildRegistration = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("child_registrations").insert(clean(data));
     if (error) throw new Error("Registration could not be saved. Please try again.");
+
+    const { sendFormNotification } = await import("@/lib/mailer.server");
+    await sendFormNotification({
+      subject: `New child registration: ${data.child_first_name}`,
+      text: [
+        `Child: ${data.child_first_name} ${data.child_last_name}`.trim(),
+        data.child_age !== null ? `Age: ${data.child_age}` : null,
+        `Parent: ${data.parent_name}`,
+        `Parent email: ${data.parent_email}`,
+        data.parent_phone ? `Parent phone: ${data.parent_phone}` : null,
+        data.allergies ? `Allergies: ${data.allergies}` : null,
+        data.medical_notes ? `Medical notes: ${data.medical_notes}` : null,
+        data.special_needs ? `Special needs: ${data.special_needs}` : null,
+        data.emergency_contact_name
+          ? `Emergency contact: ${data.emergency_contact_name} ${data.emergency_contact_phone}`
+          : null,
+        data.authorized_pickup ? `Authorized pickup: ${data.authorized_pickup}` : null,
+        `Photo consent: ${data.photo_consent ? "Yes" : "No"}`,
+      ]
+        .filter((line) => line !== null)
+        .join("\n"),
+      replyTo: data.parent_email,
+    });
+
     return { ok: true as const };
   });
