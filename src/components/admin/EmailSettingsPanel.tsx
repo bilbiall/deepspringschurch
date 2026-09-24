@@ -5,6 +5,7 @@ import {
   getEmailSettingsStatus,
   saveEmailSettings,
   testEmailConnection,
+  sendTestEmail,
 } from "@/lib/email-settings.functions";
 
 function inputClass() {
@@ -54,6 +55,8 @@ export function EmailSettingsPanel() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [testTo, setTestTo] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
 
   const [host, setHost] = useState("");
   const [port, setPort] = useState("587");
@@ -122,6 +125,19 @@ export function EmailSettingsPanel() {
       toast.error(error instanceof Error ? error.message : "Connection test failed");
     } finally {
       setTesting(false);
+    }
+  }
+
+  async function runSendTest(e: React.FormEvent) {
+    e.preventDefault();
+    setSendingTest(true);
+    try {
+      await sendTestEmail({ data: { to: testTo } });
+      toast.success(`Test email sent to ${testTo}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not send test email");
+    } finally {
+      setSendingTest(false);
     }
   }
 
@@ -246,7 +262,7 @@ export function EmailSettingsPanel() {
             />
           </div>
 
-          <div>
+          <div className="md:col-span-2">
             <label htmlFor="smtp-notify-to" className={fieldLabelClass()}>
               Send notifications to
             </label>
@@ -254,10 +270,14 @@ export function EmailSettingsPanel() {
               id="smtp-notify-to"
               value={notifyTo}
               onChange={(e) => setNotifyTo(e.target.value)}
-              placeholder="office@deepspringchurch.org"
+              placeholder="office@deepspringchurch.org, pastor@deepspringchurch.org"
               autoComplete="off"
               className={inputClass()}
             />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Separate multiple addresses with commas — every address here gets every
+              notification.
+            </p>
           </div>
         </div>
 
@@ -289,6 +309,41 @@ export function EmailSettingsPanel() {
         >
           {saving ? "Saving…" : "Save settings"}
         </button>
+      </form>
+
+      <form onSubmit={runSendTest} className="card-soft space-y-4 p-6">
+        <div>
+          <p className="text-sm font-semibold text-ink">Send a test email</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Sends a real email using the saved settings above to any address you enter — use this
+            to check actual delivery (including to a different inbox than the ones configured
+            above) rather than just whether the login works. If it fails, the error shown is the
+            real one from your mail server.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="min-w-[240px] flex-1">
+            <label htmlFor="smtp-test-to" className={fieldLabelClass()}>
+              Send test to
+            </label>
+            <input
+              id="smtp-test-to"
+              type="email"
+              value={testTo}
+              onChange={(e) => setTestTo(e.target.value)}
+              placeholder="you@gmail.com"
+              autoComplete="off"
+              className={inputClass()}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={sendingTest || !status?.configured || !testTo}
+            className="rounded-full border border-border px-5 py-2.5 text-xs font-semibold tracking-wider uppercase disabled:opacity-50"
+          >
+            {sendingTest ? "Sending…" : "Send test email"}
+          </button>
+        </div>
       </form>
     </div>
   );

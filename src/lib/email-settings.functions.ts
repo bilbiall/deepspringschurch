@@ -29,12 +29,28 @@ export const getEmailSettingsStatus = createServerFn({ method: "GET" })
     return { ...status, config };
   });
 
+const notifyToSchema = z
+  .string()
+  .trim()
+  .min(1, "Add at least one recipient email")
+  .max(1000)
+  .transform((v) =>
+    v
+      .split(/[,;]/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+  )
+  .refine((addrs) => addrs.length > 0 && addrs.every((a) => z.string().email().safeParse(a).success), {
+    message: "Enter one or more valid email addresses, separated by commas",
+  })
+  .transform((addrs) => addrs.join(", "));
+
 const saveSchema = z.object({
   host: z.string().trim().min(1).max(255),
   port: z.coerce.number().int().min(1).max(65535),
   secure: z.boolean().default(false),
   from: z.string().trim().email().max(255),
-  notifyTo: z.string().trim().email().max(255),
+  notifyTo: notifyToSchema,
   user: z.string().trim().max(255).optional().default(""),
   pass: z.string().trim().max(255).optional().default(""),
   isActive: z.boolean().default(false),
@@ -80,5 +96,19 @@ export const testEmailConnection = createServerFn({ method: "POST" })
     await assertAdmin(context.userId, context.supabase);
     const { verifySmtpConnection } = await import("@/lib/mailer.server");
     await verifySmtpConnection();
+    return { ok: true as const };
+  });
+
+const sendTestSchema = z.object({
+  to: z.string().trim().email().max(255),
+});
+
+export const sendTestEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => sendTestSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId, context.supabase);
+    const { sendTestEmail: send } = await import("@/lib/mailer.server");
+    await send(data.to);
     return { ok: true as const };
   });

@@ -10,6 +10,7 @@ export type SmtpPublicConfig = {
   port: number;
   secure: boolean;
   from: string;
+  /** Comma-separated list of one or more recipient addresses. */
   notifyTo: string;
 };
 
@@ -63,6 +64,26 @@ export async function verifySmtpConnection(): Promise<void> {
   if (!config) throw new Error("Save SMTP settings before testing the connection.");
   const transporter = await createTransporter(config);
   await transporter.verify();
+}
+
+/**
+ * Sends a real test email to an arbitrary address using the saved SMTP
+ * settings, so an admin can confirm actual delivery (not just that
+ * credentials authenticate) — including to a mailbox other than the
+ * configured notify-to address. Throws with the real underlying error on
+ * failure, unlike sendFormNotification, since this is an explicit admin
+ * action that should surface what went wrong.
+ */
+export async function sendTestEmail(to: string): Promise<void> {
+  const config = await loadSmtpSettings();
+  if (!config) throw new Error("Save SMTP settings before sending a test email.");
+  const transporter = await createTransporter(config);
+  await transporter.sendMail({
+    from: config.from,
+    to,
+    subject: "Deep Spring Church — test email",
+    text: "This is a test email from the Deep Spring Church website's Email Settings panel. If you received this, SMTP delivery is working.",
+  });
 }
 
 /**
