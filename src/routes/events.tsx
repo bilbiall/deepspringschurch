@@ -17,7 +17,7 @@ export const Route = createFileRoute("/events")({
     pageMeta({
       title: "Events and Calendar | Deep Spring Church of the Nazarene",
       description:
-        "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including our Grand Opening on October 4 and Sunday services at 10:30 AM.",
+        "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including our Grand Opening on November 1 and Sunday services at 10:30 AM.",
       path: "/events",
     }),
   loader: () => safeLoad(() => listPublishedEvents(), []),
@@ -53,14 +53,14 @@ function Events() {
       <section className="section-y bg-background">
         <div className="container-page">
           <Reveal>
-            <article className="card-soft overflow-hidden">
+            <article id="grand-opening" className="card-soft scroll-mt-28 overflow-hidden">
               <div className="grid gap-0 md:grid-cols-[220px_1fr]">
                 <div className="flex flex-col items-center justify-center bg-primary p-10 text-primary-foreground">
                   <Calendar className="h-5 w-5" aria-hidden="true" />
-                  <p className="mt-3 font-display text-2xl">October</p>
-                  <p className="font-display text-5xl leading-none">4</p>
+                  <p className="mt-3 font-display text-2xl">November</p>
+                  <p className="font-display text-5xl leading-none">1</p>
                   <p className="mt-3 text-[0.65rem] tracking-[0.16em] uppercase opacity-80">
-                    Year to be confirmed
+                    2026
                   </p>
                 </div>
                 <div className="p-8 md:p-10">
@@ -97,7 +97,7 @@ function Events() {
                   </div>
                   <p className="mt-6 text-xs text-muted-foreground">
                     Calendar downloads for Google Calendar and Apple Calendar will be enabled
-                    once an administrator confirms the year of the Grand Opening.
+                    soon.
                   </p>
                 </div>
               </div>
@@ -151,14 +151,14 @@ function Events() {
                 <li className="card-soft card-hover flex flex-wrap items-center justify-between gap-6 p-7">
                   <div>
                     <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                      October 4
+                      November 1
                     </p>
                     <h3 className="mt-2 text-xl">Grand Opening</h3>
                     <p className="mt-1 text-sm text-muted-foreground">
                       Deep Spring Church · {SITE.address.city}, {SITE.address.state}
                     </p>
                   </div>
-                  <ActionLink to="/events" variant="outline" size="sm">
+                  <ActionLink href="#grand-opening" variant="outline" size="sm">
                     View Details
                   </ActionLink>
                 </li>

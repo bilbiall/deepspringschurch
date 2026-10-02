@@ -38,7 +38,7 @@ function Sermons() {
       <PageHero
         eyebrow="Sermons"
         title="Teaching for everyday life"
-        intro="Practical, Scripture-centred messages from our Sunday gatherings. Recordings will be published here as our services begin."
+        intro="Practical, Scripture-centred messages from our Sunday gatherings. Audio and video recordings will be shared here as they become available."
       >
         <ActionLink to="/plan-your-visit">Plan Your Visit</ActionLink>
       </PageHero>
@@ -62,7 +62,7 @@ function Sermons() {
                   {featured
                     ? (featured.description ??
                       [featured.speaker, featured.scripture].filter(Boolean).join(" · "))
-                    : "Once services begin, the newest sermon will be featured here with video, audio, Scripture references and downloadable notes."}
+                    : "Sermon recordings are on the way. In the meantime, we would love to see you in person on Sunday."}
                 </p>
                 {featured?.video_url || featured?.audio_url ? (
                   <p className="mt-5">

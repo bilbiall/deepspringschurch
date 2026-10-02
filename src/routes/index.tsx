@@ -232,14 +232,14 @@ function Home() {
             <div className="card-soft grid gap-10 p-8 md:grid-cols-[auto_1fr] md:items-center md:p-12">
               <div className="flex h-32 w-32 flex-col items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                 <Calendar className="h-5 w-5" aria-hidden="true" />
-                <p className="mt-2 font-display text-2xl">October</p>
-                <p className="font-display text-3xl leading-none">4</p>
+                <p className="mt-2 font-display text-2xl">November</p>
+                <p className="font-display text-3xl leading-none">1</p>
               </div>
               <div>
                 <p className="eyebrow">Upcoming event</p>
                 <h2 className="mt-3 text-3xl md:text-4xl">Grand Opening</h2>
                 <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">
-                  Our official Grand Opening will take place on October 4. Before that date,
+                  Our official Grand Opening will take place on November 1, 2026. Before that date,
                   visitors are welcome to join us on Sundays at 10:30 AM while we continue
                   setting up and preparing the church.
                 </p>
