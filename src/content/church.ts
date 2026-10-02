@@ -215,7 +215,7 @@ export const GIVING_FUNDS = [
 
 export const GRAND_OPENING = {
   title: "Grand Opening",
-  date: "October 4",
+  date: "November 1",
   description:
     "Join us for the official Grand Opening of Deep Spring Church of the Nazarene. Before the Grand Opening, visitors are welcome to attend Sunday services at 10:30 AM while preparations continue.",
 };
