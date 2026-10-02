@@ -58,7 +58,7 @@ function Events() {
                 <div className="flex flex-col items-center justify-center bg-primary p-10 text-primary-foreground">
                   <Calendar className="h-5 w-5" aria-hidden="true" />
                   <p className="mt-3 font-display text-2xl">November</p>
-                  <p className="font-display text-5xl leading-none">4</p>
+                  <p className="font-display text-5xl leading-none">1</p>
                   <p className="mt-3 text-[0.65rem] tracking-[0.16em] uppercase opacity-80">
                     2026
                   </p>
