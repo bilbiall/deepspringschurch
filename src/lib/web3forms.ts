@@ -1,7 +1,7 @@
 // Website → Web3Forms API → info@deepspringchurch.org
 // ⚠️ PASTE YOUR WEB3FORMS ACCESS KEY BELOW (get it free at https://web3forms.com
 // by entering info@deepspringchurch.org). This key is safe to be public.
-export const WEB3FORMS_ACCESS_KEY = "YOUR_WEB3FORMS_ACCESS_KEY_HERE";
+export const WEB3FORMS_ACCESS_KEY = "d2e98db7-7d0c-4c5e-8a4e-45caad1b5f5a";
 
 const ENDPOINT = "https://api.web3forms.com/submit";
 
