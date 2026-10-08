@@ -26,14 +26,14 @@ export async function sendToWeb3Forms(
     if (s) payload[k] = s;
   });
   Object.assign(payload, extra);
-  const email = String(payload.email ?? payload.parent_email ?? "");
-  const name = String(payload.name ?? payload.parent_name ?? "Website visitor");
+  const email = String(payload["email"] ?? payload["parent_email"] ?? "");
+  const name = String(payload["name"] ?? payload["parent_name"] ?? "Website visitor");
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({
       access_key: WEB3FORMS_ACCESS_KEY,
-      subject: `[${formName}] ${payload.subject ?? `New submission from ${name}`}`,
+      subject: `[${formName}] ${payload["subject"] ?? `New submission from ${name}`}`,
       from_name: "Deep Spring Church Website",
       form_type: formName,
       ...(email ? { replyto: email } : {}),
