@@ -6,7 +6,7 @@ import { pageMeta, SITE, DIRECTIONS_URL, MAP_EMBED_URL } from "@/lib/site";
 import { PageHero, SectionHeading, ActionLink, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
-import { submitContactMessage } from "@/lib/public-forms.functions";
+import { sendToWeb3Forms, MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/web3forms";
 
 
 export const Route = createFileRoute("/contact")({
@@ -115,41 +115,28 @@ function Contact() {
                 e.preventDefault();
                 if (honeypot) return;
                 const form = e.currentTarget;
-                const fd = new FormData(form);
                 setSending(true);
                 try {
-                  await submitContactMessage({
-                    data: {
-                      name: String(fd.get("name") ?? ""),
-                      email: String(fd.get("email") ?? ""),
-                      phone: String(fd.get("phone") ?? ""),
-                      inquiry_type: String(fd.get("inquiry_type") ?? ""),
-                      subject: String(fd.get("subject") ?? ""),
-                      message: String(fd.get("message") ?? ""),
-                      is_prayer_request: isPrayer,
-                      company: "",
-                    },
+                  await sendToWeb3Forms(form, isPrayer ? "Prayer Request" : "Contact Us", {
+                    is_prayer_request: isPrayer ? "Yes — please treat confidentially" : "No",
                   });
-                  toast.success("Message sent", {
-                    description: "Thank you for reaching out. Someone will respond soon.",
-                  });
+                  toast.success(MSG_SUCCESS);
                   form.reset();
                   setConsent(false);
                   setIsPrayer(false);
                 } catch {
-                  toast.error("Your message could not be sent. Please try again.");
+                  toast.error(MSG_FAILURE);
                 } finally {
                   setSending(false);
                 }
               }}
-
             >
               {/* Simple spam trap — hidden from users and assistive technology */}
               <div className="hidden" aria-hidden="true">
                 <label htmlFor="company">Company</label>
                 <input
                   id="company"
-                  name="company"
+                  name="botcheck"
                   tabIndex={-1}
                   autoComplete="off"
                   value={honeypot}
@@ -205,7 +192,7 @@ function Contact() {
               <PrivacyNotice />
 
               <ActionButton type="submit" size="lg" disabled={sending}>
-                {sending ? "Sending…" : "Send Message"}
+                {sending ? MSG_SENDING : "Send Message"}
               </ActionButton>
             </form>
           </Reveal>

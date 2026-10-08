@@ -7,7 +7,7 @@ import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
-import { submitChildRegistration } from "@/lib/public-forms.functions";
+import { sendToWeb3Forms, MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/web3forms";
 
 import { LEADERSHIP } from "@/content/church";
 
@@ -33,6 +33,7 @@ const HIGHLIGHTS = [
 
 function ChildrenAndFamilies() {
   const [consent, setConsent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   return (
     <>
@@ -112,47 +113,20 @@ function ChildrenAndFamilies() {
             onSubmit={async (e) => {
               e.preventDefault();
               const form = e.currentTarget;
-              const fd = new FormData(form);
-              const get = (k: string) => String(fd.get(k) ?? "");
-              const notes = [
-                get("medical_information"),
-                get("sensory_needs") ? `Sensory needs: ${get("sensory_needs")}` : "",
-                get("additional_information")
-                  ? `Other: ${get("additional_information")}`
-                  : "",
-              ]
-                .filter(Boolean)
-                .join("\n");
+              setSending(true);
               try {
-                await submitChildRegistration({
-                  data: {
-                    parent_name: get("parent_name"),
-                    parent_email: get("parent_email"),
-                    parent_phone: get("parent_phone"),
-                    child_first_name: get("child_name"),
-                    child_last_name: "",
-                    child_age: fd.get("child_age") ? Number(fd.get("child_age")) : null,
-                    allergies: get("allergies"),
-                    medical_notes: notes,
-                    special_needs: get("accommodation_needs"),
-                    emergency_contact_name: get("emergency_contact"),
-                    emergency_contact_phone: "",
-                    authorized_pickup: "",
-                    photo_consent: false,
-                  },
-                });
-                toast.success("Registration received", {
-                  description:
-                    "Thank you. Our children’s ministry team will be in touch before your visit.",
-                });
+                await sendToWeb3Forms(form, "Child Registration");
+                toast.success(MSG_SUCCESS);
                 form.reset();
                 setConsent(false);
               } catch {
-                toast.error("Registration could not be saved. Please try again.");
+                toast.error(MSG_FAILURE);
+              } finally {
+                setSending(false);
               }
             }}
-
           >
+            <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Parent or guardian name" required>
                 {(p) => <input {...p} name="parent_name" type="text" required autoComplete="name" />}
@@ -201,8 +175,8 @@ function ChildrenAndFamilies() {
               solely for the care and safety of your child.
             </PrivacyNotice>
 
-            <ActionButton type="submit" size="lg">
-              Submit Registration
+            <ActionButton type="submit" size="lg" disabled={sending}>
+              {sending ? MSG_SENDING : "Submit Registration"}
             </ActionButton>
           </form>
 
