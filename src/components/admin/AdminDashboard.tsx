@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { UPLOAD_KINDS, uploadMedia, type UploadKind } from "@/lib/upload";
 import {
   CONTENT_TABLES,
   SUBMISSION_TABLES,
@@ -61,7 +62,56 @@ function useRows(table: string, orderBy: { column: string; ascending: boolean })
   return { rows, loading, error, reload: load, setRows };
 }
 
-function SubmissionsPanel({ table }: { table: SubmissionTable }) {
+const TRACKED = SUBMISSION_TABLES.filter((t) => t.statusOptions);
+
+/** Count of rows with status = 'new' per submission table; live via realtime, with a polling fallback. */
+function useNewCounts() {
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  const refresh = useCallback(async () => {
+    const results = await Promise.all(
+      TRACKED.map(async (t) => {
+        const { count } = await db
+          .from(t.key)
+          .select("id", { count: "exact", head: true })
+          .eq("status", "new");
+        return [t.key, count ?? 0] as const;
+      }),
+    );
+    setCounts(Object.fromEntries(results));
+  }, []);
+
+  useEffect(() => {
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 60_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    const channel = db.channel("admin-new-submissions");
+    for (const t of TRACKED) {
+      channel.on("postgres_changes", { event: "*", schema: "public", table: t.key }, () =>
+        void refresh(),
+      );
+    }
+    channel.subscribe();
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      void db.removeChannel(channel);
+    };
+  }, [refresh]);
+
+  return { counts, refresh };
+}
+
+function SubmissionsPanel({
+  table,
+  onChanged,
+}: {
+  table: SubmissionTable;
+  onChanged: () => void;
+}) {
   const { rows, loading, error, reload } = useRows(table.key, table.orderBy);
 
   async function updateStatus(id: string, status: string) {
@@ -70,6 +120,7 @@ function SubmissionsPanel({ table }: { table: SubmissionTable }) {
     else {
       toast.success("Status updated");
       void reload();
+      onChanged();
     }
   }
 
@@ -81,7 +132,13 @@ function SubmissionsPanel({ table }: { table: SubmissionTable }) {
   return (
     <div className="space-y-4">
       {rows.map((row) => (
-        <article key={row["id"]} className="card-soft p-6">
+        <article
+          key={row["id"]}
+          className={cn(
+            "card-soft p-6",
+            table.statusOptions && (row["status"] ?? "new") === "new" && "border-l-4 border-l-gold",
+          )}
+        >
           <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
             {table.columns.map((c) => (
               <div key={c.name}>
@@ -118,6 +175,84 @@ function SubmissionsPanel({ table }: { table: SubmissionTable }) {
   );
 }
 
+function UploadField({
+  field,
+  kind,
+  value,
+  onChange,
+}: {
+  field: FieldDef;
+  kind: UploadKind;
+  value: any;
+  onChange: (v: any) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const cfg = UPLOAD_KINDS[kind];
+  const url = typeof value === "string" ? value : "";
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    try {
+      onChange(await uploadMedia(file, kind));
+      toast.success("Uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <label
+        htmlFor={field.name}
+        className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+      >
+        {field.label}
+        {field.required ? " *" : ""}
+      </label>
+      <div className="flex gap-2">
+        <input
+          id={field.name}
+          type="text"
+          value={url}
+          required={field.required}
+          placeholder="Paste a link, or upload →"
+          onChange={(e) => onChange(e.target.value)}
+          className={inputClass()}
+        />
+        <label
+          className={cn(
+            "inline-flex shrink-0 cursor-pointer items-center rounded-xl border border-primary/35 px-4 text-xs font-semibold text-primary",
+            busy && "pointer-events-none opacity-60",
+          )}
+        >
+          {busy ? "Uploading…" : "Upload"}
+          <input type="file" accept={cfg.accept} onChange={onPick} className="sr-only" />
+        </label>
+      </div>
+      <p className="mt-1 text-[0.7rem] text-muted-foreground">Max {cfg.maxMB} MB.</p>
+      {url && kind === "image" ? (
+        <img src={url} alt="" className="mt-2 h-24 rounded-lg border border-border object-cover" />
+      ) : null}
+      {url && kind === "audio" ? <audio src={url} controls className="mt-2 w-full" /> : null}
+      {url && kind === "file" ? (
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="mt-2 inline-block text-xs text-primary underline"
+        >
+          View current file
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
 function FieldInput({
   field,
   value,
@@ -127,6 +262,9 @@ function FieldInput({
   value: any;
   onChange: (v: any) => void;
 }) {
+  if (field.type === "image" || field.type === "audio" || field.type === "file") {
+    return <UploadField field={field} kind={field.type} value={value} onChange={onChange} />;
+  }
   if (field.type === "checkbox") {
     return (
       <label className="flex items-center gap-3 text-sm text-foreground">
@@ -375,6 +513,16 @@ export function AdminDashboard({
   );
   const [active, setActive] = useState(tabs[0]!.id);
   const current = tabs.find((t) => t.id === active)!;
+  const { counts, refresh } = useNewCounts();
+  const totalNew = Object.values(counts).reduce((a, b) => a + b, 0);
+
+  useEffect(() => {
+    const base = document.title.replace(/^\(\d+\)\s*/, "");
+    document.title = totalNew > 0 ? `(${totalNew}) ${base}` : base;
+    return () => {
+      document.title = base;
+    };
+  }, [totalNew]);
 
   return (
     <div className="min-h-screen bg-cream pt-28 pb-24">
@@ -397,21 +545,33 @@ export function AdminDashboard({
         </div>
 
         <nav className="mt-10 flex flex-wrap gap-2">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setActive(t.id)}
-              className={cn(
-                "rounded-full px-5 py-2.5 text-xs font-semibold tracking-wider uppercase transition-colors",
-                active === t.id
-                  ? "bg-primary text-primary-foreground"
-                  : "border border-border bg-background text-foreground/75 hover:text-primary",
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
+          {tabs.map((t) => {
+            const n = counts[t.id] ?? 0;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActive(t.id)}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wider uppercase transition-colors",
+                  active === t.id
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border bg-background text-foreground/75 hover:text-primary",
+                  n > 0 && active !== t.id && "admin-tab-glow",
+                )}
+              >
+                {t.label}
+                {n > 0 ? (
+                  <span
+                    aria-label={`${n} new`}
+                    className="inline-flex min-w-5 items-center justify-center rounded-full bg-gold px-1.5 py-0.5 text-[0.65rem] leading-none font-bold text-ink"
+                  >
+                    {n}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
         </nav>
 
         <section className="mt-10">
@@ -424,6 +584,7 @@ export function AdminDashboard({
             <SubmissionsPanel
               key={current.id}
               table={SUBMISSION_TABLES.find((t) => t.key === current.id)!}
+              onChanged={() => void refresh()}
             />
           ) : current.kind === "reports" ? (
             <GivingReportsPanel key={current.id} />

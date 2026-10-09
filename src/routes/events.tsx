@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { pageMeta, SITE, DIRECTIONS_URL } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
-import { GRAND_OPENING } from "@/content/church";
 import { listPublishedEvents } from "@/lib/public-content.functions";
 import { safeLoad } from "@/lib/safe-load";
 
@@ -17,22 +16,29 @@ export const Route = createFileRoute("/events")({
     pageMeta({
       title: "Events and Calendar | Deep Spring Church of the Nazarene",
       description:
-        "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including our Grand Opening on November 1 and Sunday services at 10:30 AM.",
+        "Upcoming events at Deep Spring Church of the Nazarene in Glenn Heights, Texas, including featured celebrations and Sunday services at 10:30 AM.",
       path: "/events",
     }),
   loader: () => safeLoad(() => listPublishedEvents(), []),
   component: Events,
 });
 
+const TZ = "America/Chicago";
+
 function Events() {
   const events = Route.useLoaderData() as EventRow[];
   const [view, setView] = useState<"list" | "month">("list");
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const featured =
+    events.find((e) => e.is_featured && e.starts_at && new Date(e.starts_at).getTime() >= cutoff) ??
+    null;
+  const featuredDate = featured?.starts_at ? new Date(featured.starts_at) : null;
 
   const share = async () => {
     const url = `${SITE.domain}/events`;
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: `${GRAND_OPENING.title} — ${SITE.shortName}`, url });
+        await navigator.share({ title: `${featured?.title ?? "Events"} — ${SITE.shortName}`, url });
         return;
       } catch {
         /* user dismissed */
@@ -50,61 +56,83 @@ function Events() {
         intro="Sunday services begin at 10:30 AM each week. Additional events will be published here as they are scheduled."
       />
 
-      <section className="section-y bg-background">
-        <div className="container-page">
-          <Reveal>
-            <article className="card-soft overflow-hidden">
-              <div className="grid gap-0 md:grid-cols-[220px_1fr]">
-                <div className="flex flex-col items-center justify-center bg-primary p-10 text-primary-foreground">
-                  <Calendar className="h-5 w-5" aria-hidden="true" />
-                  <p className="mt-3 font-display text-2xl">October</p>
-                  <p className="font-display text-5xl leading-none">4</p>
-                  <p className="mt-3 text-[0.65rem] tracking-[0.16em] uppercase opacity-80">
-                    Year to be confirmed
-                  </p>
-                </div>
-                <div className="p-8 md:p-10">
-                  <p className="eyebrow">Featured event</p>
-                  <h2 className="mt-3 text-3xl md:text-4xl">{GRAND_OPENING.title}</h2>
-                  <div className="rule-gold mt-5" />
-                  <p className="mt-5 max-w-2xl leading-relaxed text-muted-foreground">
-                    {GRAND_OPENING.description}
-                  </p>
-                  <address className="mt-6 flex gap-3 text-sm leading-relaxed text-foreground/85 not-italic">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                    <span>
-                      Deep Spring Church
-                      <br />
-                      {SITE.address.line1}
-                      <br />
-                      {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
-                    </span>
-                  </address>
-                  <div className="mt-8 flex flex-wrap gap-3">
-                    <ActionLink to="/plan-your-visit">Plan Your Visit</ActionLink>
-                    <ActionLink
-                      href={DIRECTIONS_URL}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      variant="outline"
-                    >
-                      Get Directions
-                    </ActionLink>
-                    <ActionButton variant="quiet" onClick={share}>
-                      <Share2 className="h-4 w-4" aria-hidden="true" />
-                      Share Event
-                    </ActionButton>
+      {featured && featuredDate ? (
+        <section className="section-y bg-background">
+          <div className="container-page">
+            <Reveal>
+              <article className="card-soft overflow-hidden">
+                <div className="grid gap-0 md:grid-cols-[220px_1fr]">
+                  <div className="flex flex-col items-center justify-center bg-primary p-10 text-primary-foreground">
+                    <Calendar className="h-5 w-5" aria-hidden="true" />
+                    <p className="mt-3 font-display text-2xl">
+                      {featuredDate.toLocaleString("en-US", { month: "long", timeZone: TZ })}
+                    </p>
+                    <p className="font-display text-5xl leading-none">
+                      {featuredDate.toLocaleString("en-US", { day: "numeric", timeZone: TZ })}
+                    </p>
+                    <p className="mt-3 text-[0.65rem] tracking-[0.16em] uppercase opacity-80">
+                      {featuredDate.toLocaleString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        timeZone: TZ,
+                      })}
+                    </p>
                   </div>
-                  <p className="mt-6 text-xs text-muted-foreground">
-                    Calendar downloads for Google Calendar and Apple Calendar will be enabled
-                    once an administrator confirms the year of the Grand Opening.
-                  </p>
+                  <div className="p-8 md:p-10">
+                    <p className="eyebrow">Featured event</p>
+                    <h2 className="mt-3 text-3xl md:text-4xl">{featured.title}</h2>
+                    <div className="rule-gold mt-5" />
+                    {featured.description ? (
+                      <p className="mt-5 max-w-2xl leading-relaxed text-muted-foreground">
+                        {featured.description}
+                      </p>
+                    ) : null}
+                    <address className="mt-6 flex gap-3 text-sm leading-relaxed text-foreground/85 not-italic">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                      <span>
+                        {featured.location ?? (
+                          <>
+                            Deep Spring Church
+                            <br />
+                            {SITE.address.line1}
+                            <br />
+                            {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
+                          </>
+                        )}
+                      </span>
+                    </address>
+                    <div className="mt-8 flex flex-wrap gap-3">
+                      {featured.registration_url ? (
+                        <ActionLink
+                          href={featured.registration_url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          Register
+                        </ActionLink>
+                      ) : (
+                        <ActionLink to="/plan-your-visit">Plan Your Visit</ActionLink>
+                      )}
+                      <ActionLink
+                        href={DIRECTIONS_URL}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        variant="outline"
+                      >
+                        Get Directions
+                      </ActionLink>
+                      <ActionButton variant="quiet" onClick={share}>
+                        <Share2 className="h-4 w-4" aria-hidden="true" />
+                        Share Event
+                      </ActionButton>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </article>
-          </Reveal>
-        </div>
-      </section>
+              </article>
+            </Reveal>
+          </div>
+        </section>
+      ) : null}
 
       <section className="section-y bg-cream">
         <div className="container-page">
@@ -148,20 +176,6 @@ function Events() {
                     Plan Your Visit
                   </ActionLink>
                 </li>
-                <li className="card-soft card-hover flex flex-wrap items-center justify-between gap-6 p-7">
-                  <div>
-                    <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                      November 1
-                    </p>
-                    <h3 className="mt-2 text-xl">Grand Opening</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Deep Spring Church · {SITE.address.city}, {SITE.address.state}
-                    </p>
-                  </div>
-                  <ActionLink to="/events" variant="outline" size="sm">
-                    View Details
-                  </ActionLink>
-                </li>
                 {events.map((ev) => (
                   <li
                     key={ev.id}
@@ -171,6 +185,7 @@ function Events() {
                       <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                         {ev.starts_at
                           ? new Date(ev.starts_at).toLocaleString("en-US", {
+                              timeZone: TZ,
                               month: "long",
                               day: "numeric",
                               hour: "numeric",

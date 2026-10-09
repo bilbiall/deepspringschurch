@@ -7,6 +7,7 @@ import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/u
 import { Reveal } from "@/components/Reveal";
 import { listPublishedSermons } from "@/lib/public-content.functions";
 import { safeLoad } from "@/lib/safe-load";
+import { toEmbedUrl } from "@/lib/embed";
 
 type SermonRow = Database["public"]["Tables"]["sermons"]["Row"];
 
@@ -32,13 +33,14 @@ function Sermons() {
     [s.title, s.speaker, s.series, s.scripture].filter(Boolean).join(" ").toLowerCase().includes(q),
   );
   const featured = sermons[0];
+  const featuredEmbed = toEmbedUrl(featured?.video_url);
 
   return (
     <>
       <PageHero
         eyebrow="Sermons"
         title="Teaching for everyday life"
-        intro="Practical, Scripture-centred messages from our Sunday gatherings. Recordings will be published here as our services begin."
+        intro="Practical, Scripture-centred messages from our Sunday gatherings. Audio, video and notes will be published here as they become available."
       >
         <ActionLink to="/plan-your-visit">Plan Your Visit</ActionLink>
       </PageHero>
@@ -48,11 +50,30 @@ function Sermons() {
           <SectionHeading eyebrow="Featured" title="Latest message" />
           <Reveal>
             <div className="card-soft mt-10 grid gap-8 overflow-hidden md:grid-cols-2">
-              <div className="flex aspect-video items-center justify-center bg-cream">
-                <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300">
-                  <Play className="h-6 w-6" aria-hidden="true" />
-                </span>
-              </div>
+              {featuredEmbed ? (
+                <iframe
+                  src={featuredEmbed}
+                  title={featured?.title ?? "Sermon video"}
+                  className="aspect-video w-full"
+                  loading="lazy"
+                  allow="accelerometer; encrypted-media; picture-in-picture; fullscreen"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="flex aspect-video flex-col items-center justify-center gap-4 bg-cream p-4">
+                  {featured?.thumbnail_url ? (
+                    <img
+                      src={featured.thumbnail_url}
+                      alt=""
+                      className="h-full w-full rounded-lg object-cover"
+                    />
+                  ) : (
+                    <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Play className="h-6 w-6" aria-hidden="true" />
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="p-8">
                 <p className="eyebrow">{featured ? "Most recent" : "Coming soon"}</p>
                 <h3 className="mt-3 text-2xl">
@@ -62,17 +83,39 @@ function Sermons() {
                   {featured
                     ? (featured.description ??
                       [featured.speaker, featured.scripture].filter(Boolean).join(" · "))
-                    : "Once services begin, the newest sermon will be featured here with video, audio, Scripture references and downloadable notes."}
+                    : "Messages will be shared here as they are recorded, with Scripture references and notes you can download."}
                 </p>
-                {featured?.video_url || featured?.audio_url ? (
+                {featured?.audio_url ? (
+                  <audio
+                    src={featured.audio_url}
+                    controls
+                    preload="none"
+                    className="mt-5 w-full"
+                    aria-label={`Listen to ${featured.title}`}
+                  />
+                ) : null}
+                {featured?.video_url && !featuredEmbed ? (
                   <p className="mt-5">
                     <ActionLink
-                      href={(featured.video_url ?? featured.audio_url)!}
+                      href={featured.video_url}
                       target="_blank"
                       rel="noreferrer noopener"
                       size="sm"
                     >
-                      Watch or listen
+                      Watch video
+                    </ActionLink>
+                  </p>
+                ) : null}
+                {featured?.notes_url ? (
+                  <p className="mt-4">
+                    <ActionLink
+                      href={featured.notes_url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      variant="outline"
+                      size="sm"
+                    >
+                      Download notes
                     </ActionLink>
                   </p>
                 ) : null}
@@ -152,17 +195,39 @@ function Sermons() {
                           })
                         : ""}
                     </p>
-                    {s.video_url || s.audio_url ? (
-                      <div className="mt-5">
-                        <ActionLink
-                          href={(s.video_url ?? s.audio_url)!}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                          variant="outline"
-                          size="sm"
-                        >
-                          Watch or listen
-                        </ActionLink>
+                    {s.audio_url ? (
+                      <audio
+                        src={s.audio_url}
+                        controls
+                        preload="none"
+                        className="mt-5 w-full"
+                        aria-label={`Listen to ${s.title}`}
+                      />
+                    ) : null}
+                    {s.video_url || s.notes_url ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {s.video_url ? (
+                          <ActionLink
+                            href={s.video_url}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            variant="outline"
+                            size="sm"
+                          >
+                            Watch video
+                          </ActionLink>
+                        ) : null}
+                        {s.notes_url ? (
+                          <ActionLink
+                            href={s.notes_url}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            variant="outline"
+                            size="sm"
+                          >
+                            Notes
+                          </ActionLink>
+                        ) : null}
                       </div>
                     ) : null}
                   </li>

@@ -12,9 +12,12 @@ import {
   COMMITMENTS,
   VISITOR_STEPS,
   MINISTRIES,
-  GRAND_OPENING,
 } from "@/content/church";
-import { listPublishedSermons, listPublishedPosts } from "@/lib/public-content.functions";
+import {
+  listPublishedSermons,
+  listPublishedPosts,
+  listPublishedEvents,
+} from "@/lib/public-content.functions";
 import { safeLoad } from "@/lib/safe-load";
 
 export const Route = createFileRoute("/")({
@@ -27,11 +30,23 @@ export const Route = createFileRoute("/")({
       image: `${SITE.domain}/og-image.png`,
     }),
   loader: async () => {
-    const [sermons, posts] = await Promise.all([
+    const [sermons, posts, events] = await Promise.all([
       safeLoad(() => listPublishedSermons(), [] as Awaited<ReturnType<typeof listPublishedSermons>>),
       safeLoad(() => listPublishedPosts(), [] as Awaited<ReturnType<typeof listPublishedPosts>>),
+      safeLoad(() => listPublishedEvents(), [] as Awaited<ReturnType<typeof listPublishedEvents>>),
     ]);
-    return { sermons: sermons.slice(0, 3), posts: posts.slice(0, 3) };
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const featured =
+      events.find(
+        (e) => e.is_featured && e.starts_at && new Date(e.starts_at).getTime() >= cutoff,
+      ) ?? null;
+    return {
+      sermons: sermons.slice(0, 3),
+      posts: posts.slice(0, 3),
+      featured: featured
+        ? { title: featured.title, description: featured.description, starts_at: featured.starts_at }
+        : null,
+    };
   },
   component: Home,
 });
@@ -39,10 +54,12 @@ export const Route = createFileRoute("/")({
 const MISSION_ICONS = [Heart, Sprout, HandHeart];
 
 function Home() {
-  const { sermons, posts } = Route.useLoaderData() as {
+  const { sermons, posts, featured } = Route.useLoaderData() as {
     sermons: { id: string; title: string; speaker: string | null; preached_on: string | null }[];
     posts: { id: string; title: string; excerpt: string | null; category: string | null }[];
+    featured: { title: string; description: string | null; starts_at: string } | null;
   };
+  const featuredDate = featured ? new Date(featured.starts_at) : null;
   const reduced = useReducedMotion();
   const rise = (delay: number) =>
     reduced
@@ -225,24 +242,35 @@ function Home() {
         </div>
       </section>
 
-      {/* Grand Opening */}
+      {/* Featured event (managed from Admin → Events) */}
+      {featured && featuredDate ? (
       <section className="section-y bg-sand">
         <div className="container-page">
           <Reveal>
             <div className="card-soft grid gap-10 p-8 md:grid-cols-[auto_1fr] md:items-center md:p-12">
               <div className="flex h-32 w-32 flex-col items-center justify-center rounded-2xl bg-primary text-primary-foreground">
                 <Calendar className="h-5 w-5" aria-hidden="true" />
-                <p className="mt-2 font-display text-2xl">November</p>
-                <p className="font-display text-3xl leading-none">1</p>
+                <p className="mt-2 font-display text-2xl">
+                  {featuredDate.toLocaleString("en-US", {
+                    month: "long",
+                    timeZone: "America/Chicago",
+                  })}
+                </p>
+                <p className="font-display text-3xl leading-none">
+                  {featuredDate.toLocaleString("en-US", {
+                    day: "numeric",
+                    timeZone: "America/Chicago",
+                  })}
+                </p>
               </div>
               <div>
                 <p className="eyebrow">Upcoming event</p>
-                <h2 className="mt-3 text-3xl md:text-4xl">Grand Opening</h2>
-                <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">
-                  Our official Grand Opening will take place on November 1. Before that date,
-                  visitors are welcome to join us on Sundays at 10:30 AM while we continue
-                  setting up and preparing the church.
-                </p>
+                <h2 className="mt-3 text-3xl md:text-4xl">{featured.title}</h2>
+                {featured.description ? (
+                  <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">
+                    {featured.description}
+                  </p>
+                ) : null}
                 <div className="mt-7 flex flex-wrap gap-3">
                   <ActionLink to="/events">View Event Details</ActionLink>
                   <ActionLink to="/plan-your-visit" variant="outline">
@@ -254,6 +282,7 @@ function Home() {
           </Reveal>
         </div>
       </section>
+      ) : null}
 
       {/* New here */}
       <section className="section-y bg-background">

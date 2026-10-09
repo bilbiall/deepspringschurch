@@ -218,3 +218,20 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Admin tabs with unread (status = new) submissions */
+@keyframes admin-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-gold) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--color-gold) 0%, transparent),
+      0 0 14px 2px color-mix(in oklab, var(--color-gold) 60%, transparent);
+  }
+}
+
+.admin-tab-glow {
+  animation: admin-glow 2s ease-in-out infinite;
+  border-color: var(--color-gold);
+}

@@ -4,10 +4,14 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { pageMeta } from "@/lib/site";
 import { PageHero, SectionHeading, EmptyState, ActionLink } from "@/components/ui-kit";
-import { listPublishedPosts } from "@/lib/public-content.functions";
+import { listPublishedPosts, listPublishedResources } from "@/lib/public-content.functions";
 import { safeLoad } from "@/lib/safe-load";
 
 type PostRow = Database["public"]["Tables"]["blog_posts"]["Row"];
+type ResourceRow = Pick<
+  Database["public"]["Tables"]["resources"]["Row"],
+  "id" | "title" | "description" | "category" | "file_url" | "cover_image_url"
+>;
 
 export const Route = createFileRoute("/blog")({
   head: () =>
@@ -17,7 +21,13 @@ export const Route = createFileRoute("/blog")({
         "Articles and resources on faith, spiritual growth, community, relationships, family, prayer and discipleship from Deep Spring Church of the Nazarene.",
       path: "/blog",
     }),
-  loader: () => safeLoad(() => listPublishedPosts(), []),
+  loader: async () => {
+    const [posts, resources] = await Promise.all([
+      safeLoad(() => listPublishedPosts(), []),
+      safeLoad(() => listPublishedResources(), []),
+    ]);
+    return { posts, resources };
+  },
   component: Blog,
 });
 
@@ -33,7 +43,10 @@ const CATEGORIES = [
 ];
 
 function Blog() {
-  const posts = Route.useLoaderData() as PostRow[];
+  const { posts, resources } = Route.useLoaderData() as {
+    posts: PostRow[];
+    resources: ResourceRow[];
+  };
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(null);
   const q = query.trim().toLowerCase();
@@ -141,6 +154,48 @@ function Blog() {
               </ul>
             )}
           </div>
+
+          {resources.length > 0 ? (
+            <div id="resources" className="mt-16 scroll-mt-28">
+              <SectionHeading eyebrow="Library" title="Downloadable resources" />
+              <ul className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {resources.map((r) => (
+                  <li key={r.id} className="card-soft card-hover flex h-full flex-col overflow-hidden">
+                    {r.cover_image_url ? (
+                      <img
+                        src={r.cover_image_url}
+                        alt=""
+                        loading="lazy"
+                        className="h-44 w-full object-cover"
+                      />
+                    ) : null}
+                    <div className="flex flex-1 flex-col p-7">
+                      {r.category ? <p className="eyebrow">{r.category}</p> : null}
+                      <h3 className="mt-2 text-xl">{r.title}</h3>
+                      {r.description ? (
+                        <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                          {r.description}
+                        </p>
+                      ) : (
+                        <div className="flex-1" />
+                      )}
+                      <div className="mt-5">
+                        <ActionLink
+                          href={r.file_url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          variant="outline"
+                          size="sm"
+                        >
+                          Download
+                        </ActionLink>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div className="mt-16">
             <SectionHeading

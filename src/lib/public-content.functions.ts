@@ -14,7 +14,7 @@ export const listPublishedSermons = createServerFn({ method: "GET" }).handler(as
   const { data, error } = await publicClient()
     .from("sermons")
     .select(
-      "id,title,speaker,preached_on,series,scripture,description,video_url,audio_url,thumbnail_url,duration_minutes",
+      "id,title,speaker,preached_on,series,scripture,description,video_url,audio_url,thumbnail_url,notes_url,duration_minutes",
     )
     .eq("is_published", true)
     .order("preached_on", { ascending: false })
@@ -44,6 +44,17 @@ export const listPublishedPosts = createServerFn({ method: "GET" }).handler(asyn
     .order("published_at", { ascending: false })
     .limit(100);
   if (error) throw new Error("Articles could not be loaded.");
+  return data ?? [];
+});
+
+export const listPublishedResources = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await publicClient()
+    .from("resources")
+    .select("id,title,description,category,file_url,cover_image_url,created_at")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) throw new Error("Resources could not be loaded.");
   return data ?? [];
 });
 

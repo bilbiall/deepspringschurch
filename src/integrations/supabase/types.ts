@@ -407,6 +407,42 @@ export type Database = {
         }
         Relationships: []
       }
+      resources: {
+        Row: {
+          category: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          file_url: string
+          id: string
+          is_published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url: string
+          id?: string
+          is_published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string
+          id?: string
+          is_published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sermons: {
         Row: {
           audio_url: string | null
@@ -415,6 +451,7 @@ export type Database = {
           duration_minutes: number | null
           id: string
           is_published: boolean
+          notes_url: string | null
           preached_on: string
           scripture: string | null
           series: string | null
@@ -431,6 +468,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           is_published?: boolean
+          notes_url?: string | null
           preached_on: string
           scripture?: string | null
           series?: string | null
@@ -447,6 +485,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           is_published?: boolean
+          notes_url?: string | null
           preached_on?: string
           scripture?: string | null
           series?: string | null

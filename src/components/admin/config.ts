@@ -1,4 +1,13 @@
-export type FieldType = "text" | "textarea" | "date" | "datetime" | "number" | "checkbox";
+export type FieldType =
+  | "text"
+  | "textarea"
+  | "date"
+  | "datetime"
+  | "number"
+  | "checkbox"
+  | "image"
+  | "audio"
+  | "file";
 
 export type FieldDef = {
   name: string;
@@ -9,7 +18,7 @@ export type FieldDef = {
 };
 
 export type ContentTable = {
-  key: "sermons" | "events" | "blog_posts" | "connection_groups";
+  key: "sermons" | "events" | "blog_posts" | "resources" | "connection_groups";
   label: string;
   orderBy: { column: string; ascending: boolean };
   titleField: string;
@@ -44,9 +53,10 @@ export const CONTENT_TABLES: ContentTable[] = [
       { name: "series", label: "Series" },
       { name: "scripture", label: "Scripture" },
       { name: "description", label: "Description", type: "textarea" },
-      { name: "video_url", label: "Video URL" },
-      { name: "audio_url", label: "Audio URL" },
-      { name: "thumbnail_url", label: "Thumbnail URL" },
+      { name: "video_url", label: "Video link (YouTube / Vimeo)", placeholder: "https://youtu.be/..." },
+      { name: "audio_url", label: "Audio (upload or paste URL)", type: "audio" },
+      { name: "thumbnail_url", label: "Thumbnail image", type: "image" },
+      { name: "notes_url", label: "Sermon notes (PDF)", type: "file" },
       { name: "duration_minutes", label: "Duration (minutes)", type: "number" },
     ],
   },
@@ -64,7 +74,7 @@ export const CONTENT_TABLES: ContentTable[] = [
       { name: "category", label: "Category" },
       { name: "description", label: "Description", type: "textarea" },
       { name: "registration_url", label: "Registration URL" },
-      { name: "image_url", label: "Image URL" },
+      { name: "image_url", label: "Event image", type: "image" },
       { name: "is_featured", label: "Featured event", type: "checkbox" },
     ],
   },
@@ -81,8 +91,26 @@ export const CONTENT_TABLES: ContentTable[] = [
       { name: "category", label: "Category" },
       { name: "excerpt", label: "Excerpt", type: "textarea" },
       { name: "body", label: "Body", type: "textarea", required: true },
-      { name: "cover_image_url", label: "Cover image URL" },
+      { name: "cover_image_url", label: "Cover image", type: "image" },
       { name: "published_at", label: "Publish date", type: "datetime" },
+    ],
+  },
+  {
+    key: "resources",
+    label: "Resources",
+    orderBy: { column: "created_at", ascending: false },
+    titleField: "title",
+    subtitle: (r) => [r["category"], r["created_at"]].filter(Boolean).join(" · "),
+    fields: [
+      { name: "title", label: "Title", required: true },
+      {
+        name: "category",
+        label: "Type",
+        placeholder: "Ebook, Presentation, Study guide, Worksheet…",
+      },
+      { name: "description", label: "Description", type: "textarea" },
+      { name: "file_url", label: "File (PDF, ePub, PowerPoint, Word)", type: "file", required: true },
+      { name: "cover_image_url", label: "Cover image (optional)", type: "image" },
     ],
   },
   {
