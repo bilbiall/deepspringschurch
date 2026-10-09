@@ -14,6 +14,7 @@ import {
 import { PaymentSettingsPanel } from "./PaymentSettingsPanel";
 import { GivingReportsPanel } from "./GivingReportsPanel";
 import { EmailSettingsPanel } from "./EmailSettingsPanel";
+import { UserManagementPanel } from "./UserManagementPanel";
 
 const db = supabase as any;
 
@@ -506,6 +507,7 @@ export function AdminDashboard({
             { id: "giving-reports", label: "Giving Reports", kind: "reports" as const },
             { id: "payment-settings", label: "Payment Settings", kind: "payment-settings" as const },
             { id: "email-settings", label: "Email Settings", kind: "email-settings" as const },
+            { id: "users", label: "Users & Roles", kind: "users" as const },
           ]
         : []),
     ],
@@ -590,6 +592,8 @@ export function AdminDashboard({
             <GivingReportsPanel key={current.id} />
           ) : current.kind === "email-settings" ? (
             <EmailSettingsPanel key={current.id} />
+          ) : current.kind === "users" ? (
+            <UserManagementPanel key={current.id} currentEmail={email} />
           ) : (
             <PaymentSettingsPanel key={current.id} />
           )}
