@@ -59,24 +59,52 @@ function AdminRoute() {
     e.preventDefault();
     setBusy(true);
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/admin` },
       });
-      setBusy(false);
-      if (error) toast.error(error.message);
-      else toast.success("Account created. Check your email to confirm, then sign in.");
+      if (error) {
+        setBusy(false);
+        toast.error(error.message);
+        return;
+      }
+      if (!data.session) {
+        // Account exists already, or confirmation is pending — try signing in.
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        setBusy(false);
+        if (signInError) {
+          toast.error(
+            "That email is already registered. Sign in with your existing password instead.",
+          );
+          setMode("signin");
+          return;
+        }
+      } else {
+        setBusy(false);
+      }
+      setPassword("");
+      toast.success("Account ready. Claim administrator access below.");
+      void check();
       return;
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) toast.error(error.message);
-    else {
+    if (error) {
+      toast.error(
+        error.message === "Invalid login credentials"
+          ? "Wrong email or password. If you have never signed in, use “Set up the first staff account”."
+          : error.message,
+      );
+    } else {
       setPassword("");
       void check();
     }
   }
+
 
   async function claimAdmin() {
     setBusy(true);

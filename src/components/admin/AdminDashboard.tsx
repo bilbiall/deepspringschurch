@@ -11,9 +11,6 @@ import {
   type FieldDef,
   type SubmissionTable,
 } from "./config";
-import { PaymentSettingsPanel } from "./PaymentSettingsPanel";
-import { GivingReportsPanel } from "./GivingReportsPanel";
-import { EmailSettingsPanel } from "./EmailSettingsPanel";
 import { UserManagementPanel } from "./UserManagementPanel";
 
 const db = supabase as any;
@@ -502,14 +499,7 @@ export function AdminDashboard({
         label: t.label,
         kind: "submission" as const,
       })),
-      ...(isAdmin
-        ? [
-            { id: "giving-reports", label: "Giving Reports", kind: "reports" as const },
-            { id: "payment-settings", label: "Payment Settings", kind: "payment-settings" as const },
-            { id: "email-settings", label: "Email Settings", kind: "email-settings" as const },
-            { id: "users", label: "Users & Roles", kind: "users" as const },
-          ]
-        : []),
+      ...(isAdmin ? [{ id: "users", label: "Users & Roles", kind: "users" as const }] : []),
     ],
     [isAdmin],
   );
@@ -535,7 +525,10 @@ export function AdminDashboard({
             <h1 className="mt-3 font-display text-3xl text-ink md:text-4xl">
               Deep Spring control centre
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">Signed in as {email}</p>
+<p className="mt-2 text-sm text-muted-foreground">
+              Signed in as {email}
+              {isAdmin ? " · Administrator" : ""}
+            </p>
           </div>
           <button
             type="button"
@@ -582,20 +575,14 @@ export function AdminDashboard({
               key={current.id}
               table={CONTENT_TABLES.find((t) => t.key === current.id)!}
             />
-          ) : current.kind === "submission" ? (
+          ) : current.kind === "users" ? (
+            <UserManagementPanel key={current.id} currentEmail={email} />
+          ) : (
             <SubmissionsPanel
               key={current.id}
               table={SUBMISSION_TABLES.find((t) => t.key === current.id)!}
               onChanged={() => void refresh()}
             />
-          ) : current.kind === "reports" ? (
-            <GivingReportsPanel key={current.id} />
-          ) : current.kind === "email-settings" ? (
-            <EmailSettingsPanel key={current.id} />
-          ) : current.kind === "users" ? (
-            <UserManagementPanel key={current.id} currentEmail={email} />
-          ) : (
-            <PaymentSettingsPanel key={current.id} />
           )}
         </section>
       </div>

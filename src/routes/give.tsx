@@ -1,26 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { z } from "zod";
-import { Lock, Info, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
-import { pageMeta, SITE } from "@/lib/site";
-import { PageHero, SectionHeading, ActionLink, ActionButton } from "@/components/ui-kit";
+import { Lock } from "lucide-react";
+import { pageMeta } from "@/lib/site";
+import { PageHero, SectionHeading, ActionLink } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
-import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
 import { GIVING_FUNDS } from "@/content/church";
-import { getPublicPaymentStatus, createDonationCheckout } from "@/lib/donations.functions";
-import { safeLoad } from "@/lib/safe-load";
+
+const TITHELY_URL = "https://give.tithe.ly/?formId=d3b4c3ed-af75-48cc-b9af-21671bd1989a";
 
 export const Route = createFileRoute("/give")({
-  validateSearch: z.object({
-    donation: z.enum(["success", "cancelled"]).optional(),
-  }),
-  loader: () =>
-    safeLoad(() => getPublicPaymentStatus(), {
-      active: false,
-      achEnabled: false,
-      tithelyUrl: null,
-    }),
   head: () =>
     pageMeta({
       title: "Give | Deep Spring Church of the Nazarene",
@@ -31,111 +18,13 @@ export const Route = createFileRoute("/give")({
   component: GivePage,
 });
 
-function DonationOutcomeBanner({ outcome }: { outcome: "success" | "cancelled" }) {
-  if (outcome === "success") {
-    return (
-      <section className="bg-background pt-10">
-        <div className="container-page max-w-3xl">
-          <Reveal>
-            <div className="card-soft flex gap-4 border-primary/30 bg-accent/60 p-6">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-              <div className="text-sm leading-relaxed text-foreground/85">
-                <p className="font-display text-lg text-ink">Thank you for your gift!</p>
-                <p className="mt-2">
-                  Your generosity helps Deep Spring create a place of rest, spiritual growth and
-                  Christ-centred ministry. A receipt has been sent to your email address.
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-    );
-  }
-  return (
-    <section className="bg-background pt-10">
-      <div className="container-page max-w-3xl">
-        <Reveal>
-          <div className="card-soft flex gap-4 border-border bg-cream p-6">
-            <Info className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <div className="text-sm leading-relaxed text-foreground/85">
-              <p className="font-semibold text-ink">Your donation was not completed.</p>
-              <p className="mt-2">
-                No payment was made. Whenever you're ready, you're welcome to try again below.
-              </p>
-            </div>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 const SCRIPTURES = [
   { ref: "2 Corinthians 9:6–8", line: "God loves a cheerful giver." },
   { ref: "Acts 20:35", line: "It is more blessed to give than to receive." },
   { ref: "Matthew 6:19–21", line: "Where your treasure is, there your heart will be also." },
 ];
 
-const AMOUNTS = [25, 50, 100, 250];
-
 function GivePage() {
-  const { active: paymentsConfigured, tithelyUrl } = Route.useLoaderData();
-  const { donation } = Route.useSearch();
-  const [fund, setFund] = useState(GIVING_FUNDS[0]!.slug);
-  const [amount, setAmount] = useState<number | "custom">(50);
-  const [frequency, setFrequency] = useState<"one-time" | "weekly" | "monthly">("one-time");
-  const [anonymous, setAnonymous] = useState(false);
-  const [consent, setConsent] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    if (!paymentsConfigured) {
-      toast.info("Online giving is being prepared", {
-        description: `Please contact the church at ${SITE.phone} for ways to give today.`,
-      });
-      return;
-    }
-    if (!consent) {
-      toast.error("Please provide your consent to continue.");
-      return;
-    }
-
-    const fd = new FormData(e.currentTarget);
-    const amountValue = amount === "custom" ? Number(fd.get("custom_amount")) : amount;
-    if (!amountValue || amountValue <= 0) {
-      toast.error("Please enter a valid donation amount.");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const { checkoutUrl } = await createDonationCheckout({
-        data: {
-          fund,
-          fund_other: String(fd.get("fund_other") ?? ""),
-          amount: amountValue,
-          frequency,
-          donor_name: String(fd.get("donor_name") ?? ""),
-          donor_email: String(fd.get("donor_email") ?? ""),
-          donor_phone: String(fd.get("donor_phone") ?? ""),
-          anonymous,
-          dedication: String(fd.get("dedication") ?? ""),
-          donor_message: String(fd.get("donor_message") ?? ""),
-          cover_fees: fd.get("cover_fees") === "on",
-        },
-      });
-      window.location.assign(checkoutUrl);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Could not start checkout. Please try again.",
-      );
-      setSubmitting(false);
-    }
-  }
-
   return (
     <>
       <PageHero
@@ -144,12 +33,7 @@ function GivePage() {
         intro="Your generosity helps Deep Spring create a place of rest, spiritual growth, meaningful relationships, compassionate service and Christ-centred ministry."
       >
         <ActionLink href="#giving-form">Give Online</ActionLink>
-        <ActionLink href="#other-ways" variant="outline">
-          Other Ways to Give
-        </ActionLink>
       </PageHero>
-
-      {donation ? <DonationOutcomeBanner outcome={donation} /> : null}
 
       <section className="section-y bg-background">
         <div className="container-page max-w-3xl">
@@ -166,7 +50,39 @@ function GivePage() {
         </div>
       </section>
 
-      <section className="section-y bg-cream">
+      <section id="giving-form" className="section-y bg-cream">
+        <div className="container-page max-w-3xl">
+          <SectionHeading
+            eyebrow="Give securely"
+            title="Make a gift"
+            intro="Complete your gift below. Giving is processed securely by Tithe.ly — the church never sees or stores your card or bank details."
+          />
+
+          <Reveal>
+            <div className="card-soft mt-10 overflow-hidden p-2 sm:p-4">
+              <iframe
+                src={TITHELY_URL}
+                title="Deep Spring Church online giving form"
+                className="h-[900px] w-full rounded-xl border-0"
+                allow="payment"
+                loading="lazy"
+              />
+            </div>
+          </Reveal>
+
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+            <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+              Encrypted connection · No card details stored by the church
+            </span>
+            <ActionLink href={TITHELY_URL} target="_blank" rel="noreferrer" variant="outline">
+              Open the giving form in a new tab ↗
+            </ActionLink>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-y bg-background">
         <div className="container-page">
           <SectionHeading
             eyebrow="Why we give"
@@ -188,309 +104,29 @@ function GivePage() {
         </div>
       </section>
 
-      <section className="section-y bg-background">
+      <section className="section-y bg-cream">
         <div className="container-page">
-          <SectionHeading eyebrow="Giving funds" title="Choose where your gift goes" />
+          <SectionHeading
+            eyebrow="Giving funds"
+            title="Where your gift can go"
+            intro="Choose a fund inside the giving form above."
+          />
           <ul className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {GIVING_FUNDS.map((f, i) => (
               <Reveal as="li" key={f.slug} delay={(i % 3) * 0.07}>
-                <button
-                  type="button"
-                  onClick={() => setFund(f.slug)}
-                  aria-pressed={fund === f.slug}
-                  className={`card-soft card-hover h-full w-full p-7 text-left ${
-                    fund === f.slug ? "border-primary ring-1 ring-primary/30" : ""
-                  }`}
-                >
+                <div className="card-soft h-full p-7">
                   <h3 className="text-lg">{f.name}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                     {f.description}
                   </p>
-                  <span className="mt-5 inline-block text-xs font-semibold tracking-wide text-primary uppercase">
-                    {fund === f.slug ? "Selected" : "Select this fund"}
-                  </span>
-                </button>
+                </div>
               </Reveal>
             ))}
           </ul>
         </div>
       </section>
 
-      <section id="giving-form" className="section-y bg-cream">
-        <div className="container-page max-w-2xl">
-          <SectionHeading eyebrow="Give securely" title="Make a gift" />
-
-          {!paymentsConfigured ? (
-            <div className="card-soft mt-8 flex gap-4 border-primary/30 bg-accent/60 p-6">
-              <Info className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-              <div className="text-sm leading-relaxed text-foreground/85">
-                <p className="font-semibold text-ink">
-                  Online giving is being prepared. Please contact the church for more information
-                  about ways to give.
-                </p>
-                <p className="mt-2">
-                  Phone:{" "}
-                  <a href={SITE.phoneHref} className="text-primary hover:underline">
-                    {SITE.phone}
-                  </a>
-                  <br />
-                  Email:{" "}
-                  <a href={`mailto:${SITE.email}`} className="text-primary hover:underline">
-                    {SITE.email}
-                  </a>
-                </p>
-              </div>
-            </div>
-          ) : null}
-
-          {paymentsConfigured ? (
-            <form className="card-soft mt-8 space-y-7 p-8" onSubmit={(e) => void handleSubmit(e)}>
-              <fieldset>
-                <legend className="text-sm font-semibold text-foreground">Donation amount</legend>
-                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
-                  {AMOUNTS.map((a) => (
-                    <button
-                      key={a}
-                      type="button"
-                      onClick={() => setAmount(a)}
-                      aria-pressed={amount === a}
-                      className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
-                        amount === a
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-input bg-background text-foreground hover:border-primary/50"
-                      }`}
-                    >
-                      ${a}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => setAmount("custom")}
-                    aria-pressed={amount === "custom"}
-                    className={`rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
-                      amount === "custom"
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input bg-background text-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    Custom
-                  </button>
-                </div>
-                {amount === "custom" ? (
-                  <div className="mt-4">
-                    <Field label="Custom amount (USD)" required>
-                      {(p) => (
-                        <input
-                          {...p}
-                          name="custom_amount"
-                          type="number"
-                          min={1}
-                          step="0.01"
-                          required
-                        />
-                      )}
-                    </Field>
-                  </div>
-                ) : null}
-              </fieldset>
-
-              <Field label="Giving fund" required>
-                {(p) => (
-                  <select {...p} name="fund" value={fund} onChange={(e) => setFund(e.target.value)}>
-                    {GIVING_FUNDS.map((f) => (
-                      <option key={f.slug} value={f.slug}>
-                        {f.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </Field>
-
-              {fund === "other" ? (
-                <Field label="Purpose of this gift" required>
-                  {(p) => <input {...p} name="fund_other" type="text" required />}
-                </Field>
-              ) : null}
-
-              <fieldset>
-                <legend className="text-sm font-semibold text-foreground">Frequency</legend>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                  {(
-                    [
-                      { v: "one-time", l: "One-time" },
-                      { v: "weekly", l: "Weekly" },
-                      { v: "monthly", l: "Monthly" },
-                    ] as const
-                  ).map((f) => (
-                    <label
-                      key={f.v}
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors ${
-                        frequency === f.v ? "border-primary bg-accent" : "border-input"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="frequency"
-                        value={f.v}
-                        checked={frequency === f.v}
-                        onChange={() => setFrequency(f.v)}
-                        className="accent-[oklch(0.46_0.072_214)]"
-                      />
-                      {f.l}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <div className="grid gap-6 sm:grid-cols-2">
-                <Field label="Your name">
-                  {(p) => (
-                    <input
-                      {...p}
-                      name="donor_name"
-                      type="text"
-                      autoComplete="name"
-                      disabled={anonymous}
-                    />
-                  )}
-                </Field>
-                <Field label="Email address" required hint="Used to send your receipt.">
-                  {(p) => (
-                    <input {...p} name="donor_email" type="email" required autoComplete="email" />
-                  )}
-                </Field>
-              </div>
-              <Field label="Phone number">
-                {(p) => <input {...p} name="donor_phone" type="tel" autoComplete="tel" />}
-              </Field>
-
-              <div className="flex items-start gap-3">
-                <input
-                  id="anon"
-                  type="checkbox"
-                  checked={anonymous}
-                  onChange={(e) => setAnonymous(e.target.checked)}
-                  className="mt-1 h-5 w-5 rounded border-input accent-[oklch(0.46_0.072_214)]"
-                />
-                <label htmlFor="anon" className="text-sm text-muted-foreground">
-                  Give anonymously (your name will not be recorded with this gift)
-                </label>
-              </div>
-
-              <Field label="Dedication">
-                {(p) => (
-                  <input
-                    {...p}
-                    name="dedication"
-                    type="text"
-                    placeholder="In honour or memory of…"
-                  />
-                )}
-              </Field>
-              <Field label="Message to the church">
-                {(p) => <textarea {...p} name="donor_message" rows={3} />}
-              </Field>
-
-              <div className="flex items-start gap-3">
-                <input
-                  id="fees"
-                  type="checkbox"
-                  name="cover_fees"
-                  className="mt-1 h-5 w-5 rounded border-input accent-[oklch(0.46_0.072_214)]"
-                />
-                <label htmlFor="fees" className="text-sm text-muted-foreground">
-                  I would like to cover the payment processing fee so the full gift reaches the
-                  ministry (entirely optional).
-                </label>
-              </div>
-
-              <Consent checked={consent} onChange={setConsent}>
-                I consent to Deep Spring Church processing this gift and sending me a receipt by
-                email.
-              </Consent>
-
-              <PrivacyNotice>
-                Payments are handled entirely by a secure external payment processor. Deep Spring
-                never receives or stores card numbers, security codes or bank credentials.
-              </PrivacyNotice>
-
-              <div className="flex flex-wrap items-center gap-4">
-                <ActionButton type="submit" size="lg" disabled={submitting}>
-                  <Lock className="h-4 w-4" aria-hidden="true" />
-                  {submitting ? "Redirecting to secure checkout…" : "Give Securely"}
-                </ActionButton>
-                <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                  <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                  Encrypted connection · No card details stored by the church
-                </span>
-              </div>
-            </form>
-          ) : null}
-
-          {tithelyUrl ? (
-            <div className="card-soft mt-6 flex flex-wrap items-center justify-between gap-4 p-6">
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                Prefer to give through the Tithe.ly app or site instead?
-              </p>
-              <ActionLink href={tithelyUrl} target="_blank" rel="noreferrer" variant="outline">
-                Give via Tithe.ly ↗
-              </ActionLink>
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      <section id="other-ways" className="section-y bg-background">
-        <div className="container-page">
-          <SectionHeading eyebrow="Other ways to give" title="Beyond online giving" />
-          <ul className="mt-12 grid gap-6 md:grid-cols-2">
-            <li className="card-soft p-8">
-              <h3 className="text-xl">In person</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                Gifts may be given during a Deep Spring Church worship service.
-              </p>
-            </li>
-            <li className="card-soft p-8">
-              <h3 className="text-xl">By mail</h3>
-              <address className="mt-3 leading-relaxed text-muted-foreground not-italic">
-                Deep Spring Church
-                <br />
-                {SITE.address.line1}
-                <br />
-                {SITE.address.city}, {SITE.address.state} {SITE.address.zip}
-              </address>
-              <p className="mt-3 text-sm font-semibold text-ink">
-                Please do not send cash through the mail.
-              </p>
-            </li>
-            <li className="card-soft p-8">
-              <h3 className="text-xl">Bank transfer</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                Details coming soon. Bank information will be published only after it has been
-                securely entered and approved by an authorized administrator.
-              </p>
-            </li>
-            <li className="card-soft p-8">
-              <h3 className="text-xl">Planned or non-cash giving</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                Please contact the church before making gifts involving property, securities,
-                estates, vehicles or other non-cash assets.
-              </p>
-              <p className="mt-3 text-sm">
-                <a href={`mailto:${SITE.email}`} className="text-primary hover:underline">
-                  {SITE.email}
-                </a>
-                {" · "}
-                <a href={SITE.phoneHref} className="text-primary hover:underline">
-                  {SITE.phone}
-                </a>
-              </p>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <section className="section-y bg-cream">
+      <section className="section-y bg-background">
         <div className="container-page max-w-3xl">
           <SectionHeading eyebrow="Giving with trust" title="Handled responsibly" />
           <p className="mt-6 leading-relaxed text-muted-foreground">
@@ -514,7 +150,7 @@ function GivePage() {
               </li>
             ))}
           </ul>
-          <p className="mt-8 rounded-xl bg-background px-5 py-4 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-8 rounded-xl bg-cream px-5 py-4 text-sm leading-relaxed text-muted-foreground">
             Donors should consult their own financial or tax adviser regarding the deductibility or
             legal treatment of donations.
           </p>

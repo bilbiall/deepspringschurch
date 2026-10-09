@@ -6,7 +6,7 @@ import { pageMeta, SITE, DIRECTIONS_URL, MAP_EMBED_URL } from "@/lib/site";
 import { PageHero, SectionHeading, ActionLink, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
-import { submitVisitPlan } from "@/lib/public-forms.functions";
+import { sendToWeb3Forms, MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/web3forms";
 
 
 export const Route = createFileRoute("/plan-your-visit")({
@@ -55,6 +55,7 @@ const FACTS = [
 
 function PlanYourVisit() {
   const [consent, setConsent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   return (
     <>
@@ -170,31 +171,20 @@ function PlanYourVisit() {
             onSubmit={async (e) => {
               e.preventDefault();
               const form = e.currentTarget;
-              const fd = new FormData(form);
-              const get = (k: string) => String(fd.get(k) ?? "");
+              setSending(true);
               try {
-                await submitVisitPlan({
-                  data: {
-                    name: get("name"),
-                    email: get("email"),
-                    phone: get("phone"),
-                    preferred_contact: get("preferred_contact"),
-                    adults: Number(fd.get("adults") ?? 1),
-                    children: Number(fd.get("children") ?? 0),
-                    accessibility_needs: get("accessibility_needs"),
-                    accommodation_needs: get("accommodation_needs"),
-                    prayer_request: get("prayer_request"),
-                  },
-                });
-                toast.success("Thank you. We look forward to meeting you at Deep Spring.");
+                await sendToWeb3Forms(form, "Plan a Visit");
+                toast.success(MSG_SUCCESS);
                 form.reset();
                 setConsent(false);
               } catch {
-                toast.error("We could not save your details. Please try again.");
+                toast.error(MSG_FAILURE);
+              } finally {
+                setSending(false);
               }
             }}
-
           >
+            <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Your name" required>
                 {(p) => <input {...p} name="name" type="text" required autoComplete="name" />}
@@ -237,8 +227,8 @@ function PlanYourVisit() {
             </Consent>
             <PrivacyNotice />
 
-            <ActionButton type="submit" size="lg">
-              Tell Us You’re Coming
+            <ActionButton type="submit" size="lg" disabled={sending}>
+              {sending ? MSG_SENDING : "Tell Us You’re Coming"}
             </ActionButton>
           </form>
         </div>

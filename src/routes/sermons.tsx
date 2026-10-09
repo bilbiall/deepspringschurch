@@ -83,7 +83,7 @@ function Sermons() {
                   {featured
                     ? (featured.description ??
                       [featured.speaker, featured.scripture].filter(Boolean).join(" · "))
-                    : "Messages will be shared here as they are recorded, with Scripture references and notes you can download."}
+                    : "Sermon recordings are on the way. In the meantime, we would love to see you in person on Sunday."}
                 </p>
                 {featured?.audio_url ? (
                   <audio
