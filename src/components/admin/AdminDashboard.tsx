@@ -12,6 +12,7 @@ import {
   type SubmissionTable,
 } from "./config";
 import { UserManagementPanel } from "./UserManagementPanel";
+import { EmailSettingsPanel } from "./EmailSettingsPanel";
 
 const db = supabase as any;
 
@@ -499,7 +500,12 @@ export function AdminDashboard({
         label: t.label,
         kind: "submission" as const,
       })),
-      ...(isAdmin ? [{ id: "users", label: "Users & Roles", kind: "users" as const }] : []),
+      ...(isAdmin
+        ? [
+            { id: "email-settings", label: "Email Settings", kind: "email-settings" as const },
+            { id: "users", label: "Users & Roles", kind: "users" as const },
+          ]
+        : []),
     ],
     [isAdmin],
   );
@@ -575,6 +581,8 @@ export function AdminDashboard({
               key={current.id}
               table={CONTENT_TABLES.find((t) => t.key === current.id)!}
             />
+          ) : current.kind === "email-settings" ? (
+            <EmailSettingsPanel key={current.id} />
           ) : current.kind === "users" ? (
             <UserManagementPanel key={current.id} currentEmail={email} />
           ) : (

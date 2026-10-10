@@ -7,7 +7,8 @@ import { pageMeta, SITE } from "@/lib/site";
 import { PageHero, SectionHeading, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
-import { sendToWeb3Forms, MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/web3forms";
+import { MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/form-messages";
+import { submitChildRegistration } from "@/lib/public-forms.functions";
 
 import { LEADERSHIP } from "@/content/church";
 
@@ -23,12 +24,36 @@ export const Route = createFileRoute("/children-and-families")({
 });
 
 const HIGHLIGHTS = [
-  { icon: Heart, title: "Biblically grounded teaching", body: "Age-appropriate Bible teaching that children can understand and carry with them." },
-  { icon: ShieldCheck, title: "Safe and caring volunteers", body: "Screened, trained volunteers who know each child by name." },
-  { icon: Baby, title: "Age-appropriate activities", body: "Learning, play and conversation shaped for each stage of childhood." },
-  { icon: HandHeart, title: "Support for special needs", body: "Practical accommodation so every child can take part fully." },
-  { icon: Volume2, title: "Sensory rooms and quiet spaces", body: "Calm places to regulate, rest and rejoin at each child’s own pace." },
-  { icon: DoorOpen, title: "Secure check-in", body: "A simple, secure check-in and pick-up procedure for every service." },
+  {
+    icon: Heart,
+    title: "Biblically grounded teaching",
+    body: "Age-appropriate Bible teaching that children can understand and carry with them.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Safe and caring volunteers",
+    body: "Screened, trained volunteers who know each child by name.",
+  },
+  {
+    icon: Baby,
+    title: "Age-appropriate activities",
+    body: "Learning, play and conversation shaped for each stage of childhood.",
+  },
+  {
+    icon: HandHeart,
+    title: "Support for special needs",
+    body: "Practical accommodation so every child can take part fully.",
+  },
+  {
+    icon: Volume2,
+    title: "Sensory rooms and quiet spaces",
+    body: "Calm places to regulate, rest and rejoin at each child’s own pace.",
+  },
+  {
+    icon: DoorOpen,
+    title: "Secure check-in",
+    body: "A simple, secure check-in and pick-up procedure for every service.",
+  },
 ];
 
 function ChildrenAndFamilies() {
@@ -115,7 +140,24 @@ function ChildrenAndFamilies() {
               const form = e.currentTarget;
               setSending(true);
               try {
-                await sendToWeb3Forms(form, "Child Registration");
+                const fd = new FormData(form);
+                const field = (name: string) => String(fd.get(name) ?? "");
+                await submitChildRegistration({
+                  data: {
+                    parent_name: field("parent_name"),
+                    parent_email: field("parent_email"),
+                    parent_phone: field("parent_phone"),
+                    emergency_contact: field("emergency_contact"),
+                    child_name: field("child_name"),
+                    child_age: field("child_age") === "" ? null : Number(field("child_age")),
+                    allergies: field("allergies"),
+                    medical_information: field("medical_information"),
+                    accommodation_needs: field("accommodation_needs"),
+                    sensory_needs: field("sensory_needs"),
+                    additional_information: field("additional_information"),
+                    botcheck: field("botcheck"),
+                  },
+                });
                 toast.success(MSG_SUCCESS);
                 form.reset();
                 setConsent(false);
@@ -126,13 +168,24 @@ function ChildrenAndFamilies() {
               }
             }}
           >
-            <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+            <input
+              type="checkbox"
+              name="botcheck"
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+            />
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Parent or guardian name" required>
-                {(p) => <input {...p} name="parent_name" type="text" required autoComplete="name" />}
+                {(p) => (
+                  <input {...p} name="parent_name" type="text" required autoComplete="name" />
+                )}
               </Field>
               <Field label="Parent email" required>
-                {(p) => <input {...p} name="parent_email" type="email" required autoComplete="email" />}
+                {(p) => (
+                  <input {...p} name="parent_email" type="email" required autoComplete="email" />
+                )}
               </Field>
               <Field label="Parent phone number" required>
                 {(p) => <input {...p} name="parent_phone" type="tel" required autoComplete="tel" />}
@@ -148,9 +201,7 @@ function ChildrenAndFamilies() {
               </Field>
             </div>
 
-            <Field label="Allergies">
-              {(p) => <textarea {...p} name="allergies" rows={2} />}
-            </Field>
+            <Field label="Allergies">{(p) => <textarea {...p} name="allergies" rows={2} />}</Field>
             <Field label="Medical information">
               {(p) => <textarea {...p} name="medical_information" rows={2} />}
             </Field>
@@ -165,8 +216,8 @@ function ChildrenAndFamilies() {
             </Field>
 
             <Consent checked={consent} onChange={setConsent}>
-              I confirm I am the parent or legal guardian of this child and I consent to Deep
-              Spring Church holding this information for the care and safety of my child.
+              I confirm I am the parent or legal guardian of this child and I consent to Deep Spring
+              Church holding this information for the care and safety of my child.
             </Consent>
 
             <PrivacyNotice>

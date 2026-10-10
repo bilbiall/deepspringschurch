@@ -6,8 +6,8 @@ import { pageMeta, SITE, DIRECTIONS_URL, MAP_EMBED_URL } from "@/lib/site";
 import { PageHero, SectionHeading, ActionLink, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
-import { sendToWeb3Forms, MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/web3forms";
-
+import { MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/form-messages";
+import { submitVisitPlan } from "@/lib/public-forms.functions";
 
 export const Route = createFileRoute("/plan-your-visit")({
   head: () =>
@@ -65,7 +65,12 @@ function PlanYourVisit() {
         intro="Here is everything you need to know before Sunday. If anything is still unclear, call us — a real person will answer."
       >
         <ActionLink href="#tell-us">Tell Us You’re Coming</ActionLink>
-        <ActionLink href={DIRECTIONS_URL} target="_blank" rel="noreferrer noopener" variant="outline">
+        <ActionLink
+          href={DIRECTIONS_URL}
+          target="_blank"
+          rel="noreferrer noopener"
+          variant="outline"
+        >
           Get Directions
         </ActionLink>
       </PageHero>
@@ -118,9 +123,11 @@ function PlanYourVisit() {
                 <div>
                   <h3 className="text-base font-semibold">Children’s check-in</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    A team member will walk you through secure check-in on your first visit. You
-                    can{" "}
-                    <a href="/children-and-families#register" className="text-primary hover:underline">
+                    A team member will walk you through secure check-in on your first visit. You can{" "}
+                    <a
+                      href="/children-and-families#register"
+                      className="text-primary hover:underline"
+                    >
                       register your child in advance
                     </a>{" "}
                     to save time.
@@ -173,7 +180,22 @@ function PlanYourVisit() {
               const form = e.currentTarget;
               setSending(true);
               try {
-                await sendToWeb3Forms(form, "Plan a Visit");
+                const fd = new FormData(form);
+                const field = (name: string) => String(fd.get(name) ?? "");
+                await submitVisitPlan({
+                  data: {
+                    name: field("name"),
+                    email: field("email"),
+                    phone: field("phone"),
+                    preferred_contact: field("preferred_contact") || "email",
+                    adults: Number(field("adults") || 1),
+                    children: Number(field("children") || 0),
+                    accessibility_needs: field("accessibility_needs"),
+                    accommodation_needs: field("accommodation_needs"),
+                    prayer_request: field("prayer_request"),
+                    botcheck: field("botcheck"),
+                  },
+                });
                 toast.success(MSG_SUCCESS);
                 form.reset();
                 setConsent(false);
@@ -184,7 +206,14 @@ function PlanYourVisit() {
               }
             }}
           >
-            <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+            <input
+              type="checkbox"
+              name="botcheck"
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+            />
             <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Your name" required>
                 {(p) => <input {...p} name="name" type="text" required autoComplete="name" />}

@@ -6,8 +6,8 @@ import { pageMeta, SITE, DIRECTIONS_URL, MAP_EMBED_URL } from "@/lib/site";
 import { PageHero, SectionHeading, ActionLink, ActionButton } from "@/components/ui-kit";
 import { Reveal } from "@/components/Reveal";
 import { Field, Consent, PrivacyNotice } from "@/components/form-kit";
-import { sendToWeb3Forms, MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/web3forms";
-
+import { MSG_SENDING, MSG_SUCCESS, MSG_FAILURE } from "@/lib/form-messages";
+import { submitContactMessage } from "@/lib/public-forms.functions";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -117,8 +117,19 @@ function Contact() {
                 const form = e.currentTarget;
                 setSending(true);
                 try {
-                  await sendToWeb3Forms(form, isPrayer ? "Prayer Request" : "Contact Us", {
-                    is_prayer_request: isPrayer ? "Yes — please treat confidentially" : "No",
+                  const fd = new FormData(form);
+                  const field = (name: string) => String(fd.get(name) ?? "");
+                  await submitContactMessage({
+                    data: {
+                      name: field("name"),
+                      email: field("email"),
+                      phone: field("phone"),
+                      inquiry_type: field("inquiry_type"),
+                      subject: field("subject"),
+                      message: field("message"),
+                      is_prayer_request: isPrayer,
+                      company: honeypot,
+                    },
                   });
                   toast.success(MSG_SUCCESS);
                   form.reset();

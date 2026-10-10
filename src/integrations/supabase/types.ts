@@ -305,6 +305,45 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_credentials: {
+        Row: {
+          ach_enabled: boolean
+          created_at: string
+          id: string
+          is_active: boolean
+          mode: string
+          provider: string
+          public_value: string | null
+          secrets: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          ach_enabled?: boolean
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          mode?: string
+          provider: string
+          public_value?: string | null
+          secrets?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          ach_enabled?: boolean
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          mode?: string
+          provider?: string
+          public_value?: string | null
+          secrets?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       prayer_requests: {
         Row: {
           created_at: string

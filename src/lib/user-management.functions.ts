@@ -19,6 +19,7 @@ export type ManagedUser = {
   email: string;
   createdAt: string;
   lastSignInAt: string | null;
+  emailConfirmed: boolean;
   role: StaffRole | "none";
 };
 
@@ -52,6 +53,7 @@ export const listManagedUsers = createServerFn({ method: "GET" })
         email: u.email ?? "(no email)",
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at ?? null,
+        emailConfirmed: Boolean(u.email_confirmed_at),
         role: byUser.get(u.id) ?? ("none" as const),
       }))
       .sort((a, b) => a.email.localeCompare(b.email));
@@ -129,4 +131,82 @@ export const inviteUser = createServerFn({ method: "POST" })
 
     await applyRole(invited.user.id, data.role);
     return { ok: true as const };
+  });
+
+async function emailOf(userId: string): Promise<string> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+  if (error || !data.user?.email) throw new Error(error?.message ?? "User not found.");
+  return data.user.email;
+}
+
+const userIdSchema = z.object({ userId: z.string().uuid() });
+
+export const confirmUserEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => userIdSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId, context.supabase);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+      email_confirm: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+const passwordSchema = z.object({
+  userId: z.string().uuid(),
+  password: z.string().min(8, "Use at least 8 characters.").max(72),
+});
+
+export const setUserPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => passwordSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId, context.supabase);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Setting a password by hand also confirms the address, so the person can sign in at once.
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+      password: data.password,
+      email_confirm: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+const linkSchema = z.object({
+  userId: z.string().uuid(),
+  redirectTo: z.string().url().max(500).optional(),
+});
+
+export const sendPasswordResetEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => linkSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId, context.supabase);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = await emailOf(data.userId);
+    const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+      ...(data.redirectTo ? { redirectTo: data.redirectTo } : {}),
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const, email };
+  });
+
+/** Creates a one-time sign-in link the admin can send by WhatsApp/SMS when email is slow. */
+export const createAccessLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => linkSchema.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId, context.supabase);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = await emailOf(data.userId);
+    const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
+      type: "recovery",
+      email,
+      ...(data.redirectTo ? { options: { redirectTo: data.redirectTo } } : {}),
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const, url: link.properties.action_link };
   });
